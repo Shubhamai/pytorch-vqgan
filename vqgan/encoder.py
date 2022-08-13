@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 from torchsummary import summary
 
-from common import (DownsampleBlock, GroupNorm, NonLocalBlock, ResidualBlock,
+from vqgan.common import (DownsampleBlock, GroupNorm, NonLocalBlock, ResidualBlock,
                     Swish)
 
 
@@ -98,17 +98,3 @@ class Encoder(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
 
-if __name__ == "__main__":
-
-    image = torch.randn(1, 3, 256, 256)
-    model = Encoder()
-
-    output = model(image)
-
-    summary(
-        model,
-        input_data=image,
-        col_names=["input_size", "output_size", "num_params"],
-        device="cpu",
-        depth=2,
-    )

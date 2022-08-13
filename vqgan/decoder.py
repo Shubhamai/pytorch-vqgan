@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 from torchsummary import summary
 
-from common import (
+from vqgan.common import (
     GroupNorm,
     NonLocalBlock,
     ResidualBlock,
