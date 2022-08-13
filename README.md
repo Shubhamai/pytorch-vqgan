@@ -1,7 +1,7 @@
 # PyTorch VQGAN
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Shubhamai/pytorch-vqgan/blob/main/LICENSE)
-
+[![Run Python Tests](https://github.com/Shubhamai/pytorch-vqgan/actions/workflows/main.yml/badge.svg)](https://github.com/Shubhamai/pytorch-vqgan/actions/workflows/main.yml)
 
 <p align="center">
 <img src="./utils/assets/vqgan.png"/><br>
