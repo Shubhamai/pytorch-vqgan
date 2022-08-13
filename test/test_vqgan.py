@@ -57,3 +57,5 @@ def test_decoder():
         img_size,
         img_size,
     ), "Output of decoder does not match"
+
+    
