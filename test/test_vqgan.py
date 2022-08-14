@@ -16,6 +16,7 @@ def test_encoder():
     attn_resolution = 16
 
     image = torch.randn(1, input_channels, input_size, input_size)
+
     model = Encoder(
         img_channels=input_channels,
         input_size=input_size,

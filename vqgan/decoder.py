@@ -8,22 +8,15 @@ According to the official implementation.
 # Importing Libraries
 import torch
 import torch.nn as nn
-from torchsummary import summary
 
-from vqgan.common import (
-    GroupNorm,
-    NonLocalBlock,
-    ResidualBlock,
-    Swish,
-    UpsampleBlock,
-)
+from vqgan.common import GroupNorm, NonLocalBlock, ResidualBlock, Swish, UpsampleBlock
 
 
 class Decoder(nn.Module):
     """
     The decoder part of the VQGAN.
 
-    The implementation is similar to the encoder but inverse, to produce an image from a latent vector. 
+    The implementation is similar to the encoder but inverse, to produce an image from a latent vector.
 
     Args:
         img_channels (int): Number of channels in the output image.
@@ -87,7 +80,7 @@ class Decoder(nn.Module):
             # Due to conv in first layer, do not upsample
             if n != 0:
                 layers.append(UpsampleBlock(in_channels=in_channels))
-                input_size = input_size * 2 # Upsample by a factor of 2
+                input_size = input_size * 2  # Upsample by a factor of 2
 
         # Adding rest of the layers
         layers.extend(
@@ -103,19 +96,3 @@ class Decoder(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
-
-
-if __name__ == "__main__":
-
-    image = torch.randn(1, 256, 16, 16)
-    model = Decoder()
-
-    output = model(image)
-
-    summary(
-        model,
-        input_data=image,
-        col_names=["input_size", "output_size", "num_params"],
-        device="cpu",
-        depth=2,
-    )

@@ -1,6 +1,6 @@
 # PyTorch VQGAN
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Shubhamai/pytorch-vqgan/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Shubhamai/pytorch-vqgan/blob/main/LICENSE)
 [![Run Python Tests](https://github.com/Shubhamai/pytorch-vqgan/actions/workflows/main.yml/badge.svg)](https://github.com/Shubhamai/pytorch-vqgan/actions/workflows/main.yml)
 
 <p align="center">
@@ -20,6 +20,7 @@ This repo contains the implementation of the VQGAN - *[Taming Transformers for H
     - [Training](#training)
     - [Testing](#testing)
     - [Visualizing](#visualizing)
+    - [Tests](#tests)
   - [Notes](#notes)
     - [TODOs](#todos)
   - [Hardware requirements](#hardware-requirements)
@@ -40,6 +41,12 @@ This repo contains the implementation of the VQGAN - *[Taming Transformers for H
 ### Testing
 
 ### Visualizing
+
+### Tests
+
+I have also just started getting my feet wet with testing and automated testing with GitHub CI/CD, so the tests here might not be the best practices.
+
+To run tests, run `pytest test`
 
 ## Notes
 

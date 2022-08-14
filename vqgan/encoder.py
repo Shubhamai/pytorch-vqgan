@@ -8,10 +8,8 @@ According to the official implementation.
 # Importing Libraries
 import torch
 import torch.nn as nn
-from torchsummary import summary
 
-from vqgan.common import (DownsampleBlock, GroupNorm, NonLocalBlock, ResidualBlock,
-                    Swish)
+from vqgan.common import DownsampleBlock, GroupNorm, NonLocalBlock, ResidualBlock, Swish
 
 
 class Encoder(nn.Module):
@@ -40,7 +38,7 @@ class Encoder(nn.Module):
     ):
         super().__init__()
 
-        # Inserting first intermediate channel to index 0 
+        # Inserting first intermediate channel to index 0
         intermediate_channels.insert(0, intermediate_channels[0])
 
         # Appends all the layers to this list
@@ -74,7 +72,7 @@ class Encoder(nn.Module):
             # only downsample for the first n-2 layers, and decrease the input size by a factor of 2
             if n != len(intermediate_channels) - 2:
                 layers.append(DownsampleBlock(in_channels=intermediate_channels[n + 1]))
-                input_size = input_size // 2 # Downsample by a factor of 2
+                input_size = input_size // 2  # Downsample by a factor of 2
 
         in_channels = intermediate_channels[-1]
         layers.extend(
@@ -88,13 +86,13 @@ class Encoder(nn.Module):
                 ),
                 GroupNorm(in_channels=in_channels),
                 Swish(),
-
                 # increase the channels upto the latent vector channels
-                nn.Conv2d(in_channels, latent_channels, kernel_size=3, stride=1, padding=1),
+                nn.Conv2d(
+                    in_channels, latent_channels, kernel_size=3, stride=1, padding=1
+                ),
             ]
         )
         self.model = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
-
