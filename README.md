@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/Shubhamai/pytorch-vqgan/blob/main/LICENSE)
 [![Run Python Tests](https://github.com/Shubhamai/pytorch-vqgan/actions/workflows/main.yml/badge.svg)](https://github.com/Shubhamai/pytorch-vqgan/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/Shubhamai/pytorch-vqgan/branch/main/graph/badge.svg?token=NANKT1FU4M)](https://codecov.io/gh/Shubhamai/pytorch-vqgan)
 
 <p align="center">
 <img src="./utils/assets/vqgan.png"/><br>
