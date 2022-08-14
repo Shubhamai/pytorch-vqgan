@@ -78,6 +78,8 @@ dependencies:
     - attrs==22.1.0
     - beautifulsoup4==4.11.1
     - cachetools==5.2.0
+    - codecov==2.1.12
+    - coverage==6.4.3
     - exceptiongroup==1.0.0rc8
     - google-api-core==2.8.2
     - google-api-python-client==2.56.0
@@ -96,6 +98,7 @@ dependencies:
     - pyasn1-modules==0.2.8
     - pyparsing==3.0.9
     - pytest==7.1.2
+    - pytest-cov==3.0.0
     - rsa==4.9
     - sortedcontainers==2.4.0
     - soupsieve==2.3.2.post1
