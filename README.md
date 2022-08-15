@@ -12,7 +12,9 @@
 > **Note:** This is a work in progress.
 
 
-This repo contains the implementation of the VQGAN - *[Taming Transformers for High-Resolution Image Synthesis](https://arxiv.org/abs/2010.11929)* in PyTorch from scratch. I wanted to create this repo to better understand VQGAN myself, but to also to provide scripts for faster training and experimentation with a toy dataset like MNIST etc. I also tried to make it as clean as possible, with comments, logging, and testing, custom dataloaders & visualizations, etc.   
+This repo purpose is to serve as a more cleaner and feature-rich implementation of the VQGAN - *[Taming Transformers for High-Resolution Image Synthesis](https://arxiv.org/abs/2010.11929)* from the initial work of [dome272's repo](https://github.com/dome272/VQGAN-pytorch) in PyTorch from scratch. There's also a great video on the [explanation of VQGAN](https://youtu.be/wcqLFDXaDO8) by dome272.  
+
+I created this repo to better understand VQGAN myself, and to provide scripts for faster training and experimentation with a toy dataset like MNIST etc. I also tried to make it as clean as possible, with comments, logging, testing & coverage, custom datasets & visualizations, etc.   
 
 - [PyTorch VQGAN](#pytorch-vqgan)
   - [What is VQGAN?](#what-is-vqgan)
@@ -47,7 +49,7 @@ This repo contains the implementation of the VQGAN - *[Taming Transformers for H
 
 I have also just started getting my feet wet with testing and automated testing with GitHub CI/CD, so the tests here might not be the best practices.
 
-To run tests, run `pytest test`
+To run tests, run `pytest --cov-config=.coveragerc --cov=. test`
 
 ## Notes
 

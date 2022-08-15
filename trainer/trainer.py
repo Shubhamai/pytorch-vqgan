@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 
-class Trainer:
+class VQGANTrainer:
     """Trainer class for VQGAN, contains step, train, and test methods"""
 
     def __init__(self, encoder: nn.Module, decoder: nn.Module) -> None:
