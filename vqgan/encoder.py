@@ -6,6 +6,11 @@ According to the official implementation.
 """
 
 # Importing Libraries
+from distutils.sysconfig import get_makefile_filename
+from imp import get_frozen_object
+from os import get_blocking
+from sre_parse import GLOBAL_FLAGS
+from turtle import ht
 import torch
 import torch.nn as nn
 
@@ -18,8 +23,9 @@ class Encoder(nn.Module):
 
     Args:
         img_channels (int): Number of channels in the input image.
-        input_size (int): Size of the input tensor (height or width ).
+        image_size (int): Size of the input image, only used in encoder (height or width ).
         latent_channels (int): Number of channels in the latent vector.
+        latent_size (int): Size of the latent vector, only used in decoder. 
         intermediate_channels (list): List of channels in the intermediate layers.
         num_residual_blocks (int): Number of residual blocks b/w each downsample block.
         dropout (float): Dropout probability for residual blocks.
@@ -29,8 +35,9 @@ class Encoder(nn.Module):
     def __init__(
         self,
         img_channels: int = 3,
-        input_size: int = 256,
+        image_size: int = 256,
         latent_channels: int = 256,
+        latent_size:int = 16,
         intermediate_channels: list = [128, 128, 256, 256, 512],
         num_residual_blocks: int = 2,
         dropout: float = 0.0,
@@ -66,13 +73,13 @@ class Encoder(nn.Module):
                 in_channels = out_channels
 
                 # Once we have downsampled the image to the size in attention resolution, we add attention blocks
-                if input_size in attention_resolution:
+                if image_size in attention_resolution:
                     layers.append(NonLocalBlock(in_channels))
 
             # only downsample for the first n-2 layers, and decrease the input size by a factor of 2
             if n != len(intermediate_channels) - 2:
                 layers.append(DownsampleBlock(in_channels=intermediate_channels[n + 1]))
-                input_size = input_size // 2  # Downsample by a factor of 2
+                image_size = image_size // 2  # Downsample by a factor of 2
 
         in_channels = intermediate_channels[-1]
         layers.extend(

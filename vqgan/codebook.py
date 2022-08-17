@@ -1,5 +1,5 @@
 """
-Constains classes for the Codebook.
+Contains class for the Codebook.
 """
 
 # Importing Libraries
@@ -13,7 +13,10 @@ class CodeBook(nn.Module):
 
     We generate the codebook from nn.Embeddings of given size and randomly initialize the weights in uniform distribution.
 
-    The `forward` method is mostly to calculate loss, and the nearest vector in the codebook from the given latent vector.
+    The `forward` method is mostly to calculates
+    1. the nearest vector in the codebook from the given latent vector by the encoder.
+    2. The index of the nearest vector in the codebook.
+    3. loss ( from eq. 4 ) ( except reconstruction loss )
 
     Args:
         num_codebook_vectors (int): Number of codebook vectors.
@@ -21,7 +24,7 @@ class CodeBook(nn.Module):
         beta (int): Beta value for the commitment loss.
     """
 
-    def __init__(self, num_codebook_vectors: int, latent_dim: int, beta: int):
+    def __init__(self, num_codebook_vectors: int, latent_dim: int, beta: int = 1):
         super().__init__()
 
         self.num_codebook_vectors = num_codebook_vectors
@@ -39,23 +42,30 @@ class CodeBook(nn.Module):
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         """
         Calculates the loss and nearest vector in the codebook from the given latent vector.
-        
-        We are mostly implementing the eq 2 and 4 ( expect reconstruction loss ) from the paper. 
+
+        We are mostly implementing the eq 2 and 4 ( except reconstruction loss ) from the paper.
+
+        Args:
+            z (torch.Tensor): Latent vector.
+        Returns:
+            torch.Tensor: Nearest vector in the codebook.
+            torch.Tensor: Index of the nearest vector in the codebook.
+            torch.Tensor: Loss ( except reconstruction loss ).
         """
 
         # Channel to last dimension and copying the tensor to store it in a contiguous ( in a sequence ) way
-        z = z.premute(0, 2, 3, 1).contiguous()
+        z = z.permute(0, 2, 3, 1).contiguous()
 
         z_flattened = z.view(
             -1, self.latent_dim
         )  # b*h*w * latent_dim, will look similar to codebook in fig 2 of the paper
 
-        # calculating the distance between the z to the vectors in flattened codebook
+        # calculating the distance between the z to the vectors in flattened codebook, from eq. 2
         # (a - b)^2 = a^2 + b^2 - 2ab
         distance = (
             torch.sum(
                 z_flattened**2, dim=1, keepdim=True
-            )  # keepdim = True to keep the same shape as z_flattened, due values in dim=1 updates to sum values
+            )  # keepdim = True to keep the same original shape after the sum
             + torch.sum((self.codebook.weight**2), dim=1)
             - 2
             * torch.matmul(
@@ -74,7 +84,7 @@ class CodeBook(nn.Module):
         to GAN loss to create the final loss function for VQGAN, eq. 6 in the paper.
 
         
-        Note : In the first para of A. Changlog section of the paper, they found a bug which resulted in beta equal to 1,  
+        Note : In the first para of A. Changlog section of the paper, they found a bug which resulted in beta equal to 1. just a note :)
         """
         loss = torch.mean(
             torch.sum((z_q.detach() - z) ** 2)  # detach() to avoid backpropagation
@@ -88,6 +98,6 @@ class CodeBook(nn.Module):
         z_q = z + (z_q - z).detach()
 
         # reshapring to the original shape
-        z_q = z_q.premute(0, 3, 1, 2)
+        z_q = z_q.permute(0, 3, 1, 2)
 
         return z_q, min_distance_indices, loss
