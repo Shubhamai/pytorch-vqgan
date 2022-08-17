@@ -87,11 +87,11 @@ class CodeBook(nn.Module):
         Note : In the first para of A. Changlog section of the paper, they found a bug which resulted in beta equal to 1. just a note :)
         """
         loss = torch.mean(
-            torch.sum((z_q.detach() - z) ** 2)  # detach() to avoid backpropagation
+            torch.sum((z_q.detach() - z) ** 2)  # detach() to avoid calculating gradient while backpropagating
             + self.beta
             * torch.mean(
                 (z_q - z.detach()) ** 2
-            )  # commitment loss, detach() to avoid backpropagation
+            )  # commitment loss, detach() to avoid calculating gradient while backpropagating
         )
 
         # Not sure why we need this, but it's in the original implementation and mentions for "preserving gradients"

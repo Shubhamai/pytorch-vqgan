@@ -44,22 +44,71 @@ Learning both of these short and long-term interactions to generate high-resolut
   <em>Figure 2. VQVAE Architecture</em>
   </p>
 
-2. Using a transformer to learn the global interactions between the vectors in the codebook, to generate high-resolution images. 
+2. Using a transformer to learn the global interactions between the vectors in the codebook by predicting the next sequence from the previous sequences, to generate high-resolution images. 
 
 
 
 ### Stage 1
 <img align="right" src="./utils/assets/encoder_arch.png" width="350"/>
-The architecture of VQGAN consists of majorly three parts, the encoder, decoder and the Codebook, similar to the VQVAE paper 
+The architecture of VQGAN consists of majorly three parts, the encoder, decoder and the Codebook, similar to the VQVAE paper. 
 
 
-1. The encoder [`encoder.py`](vqgan/encoder.py) part in the VQGAN learns to represent the images into a much lower dimension called embeddings and consists of Convolution, Downsample, Residual blocks and special attention blocks ( Non-Local blocks ), around 30 million parameter in default settings. 
+1. The encoder [`encoder.py`](vqgan/encoder.py) part in the VQGAN learns to represent the images into a much lower dimension called embeddings or latent and consists of Convolution, Downsample, Residual blocks and special attention blocks ( Non-Local blocks ), around 30 million parameters in default settings. 
 2. The embeddings are then quantized using CodeBook and the quantized embeddings are used as input to the decoder [`decoder.py`](vqgan/decoder.py) part. 
-3. The decode takes those embeddings and reconstructs the images. The architecture is similar to the encoder but reversed. Around 40 million parameters in default settings, slightly more compared to encoder due to more number of residual blocks. 
+3. The decode takes the "quantized" embeddings and reconstructs the image. The architecture is similar to the encoder but reversed. Around 40 million parameters in default settings, slightly more compared to encoder due to more number of residual blocks. 
+
+The main idea behind codebook and quantization is to convert the continuous latent representation into a discrete representation. The codebook is simply a list of `n` latent vectors ( which are learned while training ) which are then used to replace the latents generated from the encoder output with the closest vector ( in terms of distance ) from the codebook. The **VQ** part comes from here. 
 
 ### Training
 
+The training involves, sending the batch of images though the encoder, quantizing the embeddings and then sending the quantized embeddings through the decoder to reconstruct the image. The loss function is computed as follows:
 
+
+$$
+\begin{aligned}
+\mathcal{L}_{\mathrm{VQ}}(E, G, \mathcal{Z})=\|x-\hat{x}\|^{2} &+\left\|\operatorname{sg}[E(x)]-z_{\mathbf{q}}\right\|_{2}^{2}+\left\|\operatorname{sg}\left[z_{\mathbf{q}}\right]-E(x)\right\|_{2}^{2} .
+\end{aligned}
+$$
+
+The above equation represents the sum of reconstruction loss, alignment and commitment loss
+
+1. Reconstruction loss
+
+    > Appartely there is some confusion about is this  reconstruction loss was replaced with preceptual loss or it was a combination of them, we will go with what was implemented in the official code https://github.com/CompVis/taming-transformers/issues/40, which is l1 + perceptual loss
+
+    <img align="right" src="./utils/assets/preceptual_loss.png" width="350"/>
+
+
+    The reconstruction loss is a sum of the l1 loss and perceptual loss.  
+    $$\text { L1 Loss }=\sum_{i=1}^{n}\left|y_{\text {true }}-y_{\text {predicted }}\right|$$
+
+    The preceptual is calculated the l2 distance between the last layer output of the generated vs original image from pre-trained model like VGG, etc. 
+
+2. The alignment and commitment loss is from the quantization which compares the distance between the latent vectors from encoder output and the closest vector from the codebook. `sg` here means stop gradient function. 
+
+    ---
+  <img align="right" src="./utils/assets/patchgan_disc.jpg" width="250"/>
+
+
+$$
+\mathcal{L}_{\mathrm{GAN}}(\{E, G, \mathcal{Z}\}, D)=[\log D(x)+\log (1-D(\hat{x}))]
+$$
+
+The above loss is for the discriminator which takes in real and generated images and learns to classify which one's real or face. the **GAN** in VQGAN comes from here :) 
+
+The discrimination here is a bit different than conventional discriminators in that, instead of taking whole images as an input, they instead convert the images into patches using convolution and then predict which patch is real or fake.  
+
+
+$$
+\lambda=\frac{\nabla_{G_{L}}\left[\mathcal{L}_{\mathrm{rec}}\right]}{\nabla_{G_{L}}\left[\mathcal{L}_{\mathrm{GAN}}\right]+\delta}
+$$
+
+
+$$
+\begin{aligned}
+\mathcal{Q}^{*}=\underset{E, G, \mathcal{Z}}{\arg \min } \max _{D} \mathbb{E}_{x \sim p(x)}\left[\mathcal{L}_{\mathrm{VQ}}(E, G, \mathcal{Z})+\lambda \mathcal{L}_{\mathrm{GAN}}(\{E, G, \mathcal{Z}\}, D)\right]
+\end{aligned}
+$$
 
 
 ## Setup 
