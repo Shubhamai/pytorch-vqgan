@@ -84,7 +84,9 @@ class CodeBook(nn.Module):
         to GAN loss to create the final loss function for VQGAN, eq. 6 in the paper.
 
         
-        Note : In the first para of A. Changlog section of the paper, they found a bug which resulted in beta equal to 1. just a note :)
+        Note : In the first para of A. Changlog section of the paper, 
+        they found a bug which resulted in beta equal to 1. here https://github.com/CompVis/taming-transformers/issues/57 
+        just a note :)
         """
         loss = torch.mean(
             torch.sum((z_q.detach() - z) ** 2)  # detach() to avoid calculating gradient while backpropagating

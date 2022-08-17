@@ -19,7 +19,9 @@ I created this repo to better understand VQGAN myself, and to provide scripts fo
 - [PyTorch VQGAN](#pytorch-vqgan)
   - [What is VQGAN?](#what-is-vqgan)
     - [Stage 1](#stage-1)
-    - [Training](#training)
+      - [Training](#training)
+    - [Generation](#generation)
+    - [Stage 2](#stage-2)
   - [Setup](#setup)
   - [Usage](#usage)
     - [Training](#training-1)
@@ -39,16 +41,23 @@ VQGAN stands for **V**ector **Q**uantised **G**enerative **A**dversarial **N**et
 Learning both of these short and long-term interactions to generate high-resolution images is done in two different stages. 
 
 1. The first stage uses VQGAN to learn the codebook of **context-rich** visual representation of the images. In terms of architecture, it is very similar to VQVAE in that it consists of an encoder, decoder and the codebook. We will learn more about this in the next section. 
-  <p align="center">
-  <img src="./utils/assets/vqvae_arch.png" width="400"/><br>
-  <em>Figure 2. VQVAE Architecture</em>
-  </p>
+
+<p align="center">
+<img src="./utils/assets/vqvae_arch.png" width="400"/><br>
+<em>Figure 2. VQVAE Architecture</em>
+</p>
 
 2. Using a transformer to learn the global interactions between the vectors in the codebook by predicting the next sequence from the previous sequences, to generate high-resolution images. 
 
-
+---
 
 ### Stage 1
+
+<p align="center">
+<img src="./utils/assets/stage_1.png" width="400"/><br>
+<em>Stage 1 : VQGAN Architecture</em>
+</p>
+
 <img align="right" src="./utils/assets/encoder_arch.png" width="350"/>
 The architecture of VQGAN consists of majorly three parts, the encoder, decoder and the Codebook, similar to the VQVAE paper. 
 
@@ -59,7 +68,7 @@ The architecture of VQGAN consists of majorly three parts, the encoder, decoder 
 
 The main idea behind codebook and quantization is to convert the continuous latent representation into a discrete representation. The codebook is simply a list of `n` latent vectors ( which are learned while training ) which are then used to replace the latents generated from the encoder output with the closest vector ( in terms of distance ) from the codebook. The **VQ** part comes from here. 
 
-### Training
+#### Training
 
 The training involves, sending the batch of images though the encoder, quantizing the embeddings and then sending the quantized embeddings through the decoder to reconstruct the image. The loss function is computed as follows:
 
@@ -87,7 +96,7 @@ The above equation represents the sum of reconstruction loss, alignment and comm
 2. The alignment and commitment loss is from the quantization which compares the distance between the latent vectors from encoder output and the closest vector from the codebook. `sg` here means stop gradient function. 
 
     ---
-  <img align="right" src="./utils/assets/patchgan_disc.jpg" width="250"/>
+  <img align="right" src="./utils/assets/patchgan_disc.png" width="250"/>
 
 
 $$
@@ -98,11 +107,17 @@ The above loss is for the discriminator which takes in real and generated images
 
 The discrimination here is a bit different than conventional discriminators in that, instead of taking whole images as an input, they instead convert the images into patches using convolution and then predict which patch is real or fake.  
 
+<br>
+
+---
 
 $$
 \lambda=\frac{\nabla_{G_{L}}\left[\mathcal{L}_{\mathrm{rec}}\right]}{\nabla_{G_{L}}\left[\mathcal{L}_{\mathrm{GAN}}\right]+\delta}
 $$
 
+We calculate lambda as the ratio between the reconstruction loss and the GAN loss, both with respect to the gradient of the last layer of the decoder. `calculate_lambda` in [`vqgan.py`](vqgan/vqgan.py) 
+
+The final loss then becomes  - 
 
 $$
 \begin{aligned}
@@ -110,6 +125,28 @@ $$
 \end{aligned}
 $$
 
+which is the combination of the reconstruction loss, alignment loss and commitment loss and discriminator loss multiplied with `lambda`. 
+
+### Generation
+
+
+To generate the images from VQGAN, we generate the quantized vectors from [Stage 2](#stage-2) and pass it through the decoder to reconstruct the image.
+
+---
+
+### Stage 2
+
+  <p align="center">
+  <img src="./utils/assets/stage_2.png" width="500"/><br>
+  <em>Stage 2: Transformers</em>
+  </p>
+
+<img align="right" src="./utils/assets/sliding_window.png" width="300"/>
+
+
+This stage contains Transformers 🤖 which are trained to predict the next latent vector from the sequence of previous latent vectors. 
+
+Due to computation constraints, to generate high-resolution images, they use a sliding attention window to predict the next latent vector from its neighbor vectors in the quantized encoder output.   
 
 ## Setup 
 
