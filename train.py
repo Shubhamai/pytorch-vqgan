@@ -6,7 +6,7 @@ from trainer import VQGANTrainer
 
 trainer = VQGANTrainer()
 
-# summary(trainer.vqgan.encoder,  input_data=torch.rand((1, 1, 256, 256)), col_names = ["input_size", "output_size", "num_params"],
+# summary(trainer.vqgan.encoder,  input_data=torch.rand((1, 3, 256, 256)), col_names = ["input_size", "output_size", "num_params"],
 #     device = "cuda",
 #     depth = 2,)
 

@@ -5,8 +5,6 @@ Implementing the main VQGAN, containing forward pass, lambda calculation, and to
 """
 
 # Importing Libraries
-from os import stat
-from turtle import forward
 import torch
 import torch.nn as nn
 
@@ -24,7 +22,7 @@ class VQGAN(nn.Module):
         img_size (int, optional): Size of the input image. Defaults to 256.
         latent_channels (int, optional): Number of channels in the latent vector. Defaults to 256.
         latent_size (int, optional): Size of the latent vector. Defaults to 16.
-        intermediate_channels (list, optional): List of channels in the intermediate layers of encoder and decoder. Defaults to [512, 256, 256, 128, 128].
+        intermediate_channels (list, optional): List of channels in the intermediate layers of encoder and decoder. Defaults to [128, 128, 256, 256, 512].
         num_residual_blocks_encoder (int, optional): Number of residual blocks in the encoder. Defaults to 3.
         num_residual_blocks_decoder (int, optional): Number of residual blocks in the decoder. Defaults to 3.
         dropout (float, optional): Dropout probability. Defaults to 0.0.
@@ -37,7 +35,7 @@ class VQGAN(nn.Module):
         img_size: int = 256,
         latent_channels: int = 256,
         latent_size: int = 16,
-        intermediate_channels: list = [512, 256, 256, 128, 128],
+        intermediate_channels: list = [128, 128, 256, 256, 512],
         num_residual_blocks_encoder: int = 2,
         num_residual_blocks_decoder: int = 3,
         dropout: float = 0.0,

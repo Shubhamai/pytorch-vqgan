@@ -85,18 +85,17 @@ class CodeBook(nn.Module):
         z_q = self.codebook(min_distance_indices).view(z.shape)
 
         """
-        this represent the equation 4 from the paper ( except the reconstruction loss ) . Thia loss will then be added 
+        this represent the equation 4 from the paper ( except the reconstruction loss ) . Thia loss will then be added
         to GAN loss to create the final loss function for VQGAN, eq. 6 in the paper.
 
-        
-        Note : In the first para of A. Changlog section of the paper, 
-        they found a bug which resulted in beta equal to 1. here https://github.com/CompVis/taming-transformers/issues/57 
+
+        Note : In the first para of A. Changlog section of the paper,
+        they found a bug which resulted in beta equal to 1. here https://github.com/CompVis/taming-transformers/issues/57
         just a note :)
         """
         loss = torch.mean(
-            torch.sum(
-                (z_q.detach() - z) ** 2
-            )  # detach() to avoid calculating gradient while backpropagating
+            (z_q.detach() - z) ** 2
+            # detach() to avoid calculating gradient while backpropagating
             + self.beta
             * torch.mean(
                 (z_q - z.detach()) ** 2

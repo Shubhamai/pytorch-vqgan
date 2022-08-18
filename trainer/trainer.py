@@ -8,6 +8,7 @@ import os
 import lpips
 import torch
 import torch.nn.functional as F
+import numpy as np
 import torchvision
 
 from dataloader import load_dataloader
@@ -23,33 +24,24 @@ class VQGANTrainer:
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        self.vqgan = VQGAN(
-            img_channels=1,
-            # img_size=32,
-            # latent_channels=32,
-            # latent_size=16,
-            # num_residual_blocks_decoder=2,
-            # num_residual_blocks_encoder=3,
-            # num_codebook_vectors=512,
-            # attention_resolution=[16],
-            intermediate_channels =  [128, 128, 256, 256, 512],
-        ).to(self.device)
+        self.vqgan = VQGAN(img_channels=1).to(self.device)
         self.discriminator = Discriminator(image_channels=1).to(self.device)
         self.discriminator.apply(weights_init)
 
-        self.perceptual_loss = lpips.LPIPS(net="vgg").to(self.device)
+        self.perceptual_loss =  lpips.LPIPS(net="vgg").to(self.device)
 
-        self.dataloader = load_dataloader(image_size=256, batch_size=2)
+        self.dataloader = load_dataloader(name="mnist", image_size=256, batch_size=1, save_path="data/testSet")
 
         self.opt_vq, self.opt_disc = self.configure_optimizers()
 
         # Hyperprameters
         self.global_step = 0
         self.disc_factor = 1.0
-        self.disc_start = 1
+        self.disc_start = 100
         self.perceptual_loss_factor = 1.0
         self.rec_loss_factor = 1.0
 
+    
     def configure_optimizers(
         self, learning_rate: float = 2.25e-05, beta1: float = 0.5, beta2: float = 0.9
     ):
@@ -123,6 +115,7 @@ class VQGANTrainer:
             for index, (imgs, _) in enumerate(self.dataloader):
 
                 # Training step
+                # imgs = imgs.expand(imgs.shape[0], 1, imgs.shape[2], imgs.shape[3]).to(self.device) 
                 imgs = imgs.to(self.device)
 
                 decoded_images, vq_loss, gan_loss = self.step(imgs)
