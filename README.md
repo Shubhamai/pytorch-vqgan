@@ -12,7 +12,7 @@
 > **Note:** This is a work in progress.
 
 
-This repo purpose is to serve as a more cleaner and feature-rich implementation of the VQGAN - *[Taming Transformers for High-Resolution Image Synthesis](https://arxiv.org/abs/2010.11929)* from the initial work of [dome272's repo](https://github.com/dome272/VQGAN-pytorch) in PyTorch from scratch. There's also a great video on the [explanation of VQGAN](https://youtu.be/wcqLFDXaDO8) by dome272.  
+This repo purpose is to serve as a cleaner and feature-rich implementation of the VQGAN - *[Taming Transformers for High-Resolution Image Synthesis](https://arxiv.org/abs/2010.11929)* from the initial work of [dome272's repo](https://github.com/dome272/VQGAN-pytorch) in PyTorch from scratch. There's also a great video on the [explanation of VQGAN](https://youtu.be/wcqLFDXaDO8) by dome272.  
 
 I created this repo to better understand VQGAN myself, and to provide scripts for faster training and experimentation with a toy dataset like MNIST etc. I also tried to make it as clean as possible, with comments, logging, testing & coverage, custom datasets & visualizations, etc.   
 
@@ -54,7 +54,7 @@ Learning both of these short and long-term interactions to generate high-resolut
 ### Stage 1
 
 <p align="center">
-<img src="./utils/assets/stage_1.png" width="400"/><br>
+<img src="./utils/assets/stage_1.png" width="500"/><br>
 <em>Stage 1 : VQGAN Architecture</em>
 </p>
 
@@ -70,7 +70,7 @@ The main idea behind codebook and quantization is to convert the continuous late
 
 #### Training
 
-The training involves, sending the batch of images though the encoder, quantizing the embeddings and then sending the quantized embeddings through the decoder to reconstruct the image. The loss function is computed as follows:
+The training involves, sending the batch of images through the encoder, quantizing the embeddings and then sending the quantized embeddings through the decoder to reconstruct the image. The loss function is computed as follows:
 
 
 $$
@@ -83,15 +83,15 @@ The above equation represents the sum of reconstruction loss, alignment and comm
 
 1. Reconstruction loss
 
-    > Appartely there is some confusion about is this  reconstruction loss was replaced with preceptual loss or it was a combination of them, we will go with what was implemented in the official code https://github.com/CompVis/taming-transformers/issues/40, which is l1 + perceptual loss
+    > Appartely there is some confusion about is this  reconstruction loss was replaced with perceptual loss or it was a combination of them, we will go with what was implemented in the official code https://github.com/CompVis/taming-transformers/issues/40, which is l1 + perceptual loss
 
-    <img align="right" src="./utils/assets/preceptual_loss.png" width="350"/>
+    <img align="right" src="./utils/assets/perceptual_loss.png" width="350"/>
 
 
     The reconstruction loss is a sum of the l1 loss and perceptual loss.  
     $$\text { L1 Loss }=\sum_{i=1}^{n}\left|y_{\text {true }}-y_{\text {predicted }}\right|$$
 
-    The preceptual is calculated the l2 distance between the last layer output of the generated vs original image from pre-trained model like VGG, etc. 
+    The perceptual is calculated the l2 distance between the last layer output of the generated vs original image from pre-trained model like VGG, etc. 
 
 2. The alignment and commitment loss is from the quantization which compares the distance between the latent vectors from encoder output and the closest vector from the codebook. `sg` here means stop gradient function. 
 
@@ -130,7 +130,7 @@ which is the combination of the reconstruction loss, alignment loss and commitme
 ### Generation
 
 
-To generate the images from VQGAN, we generate the quantized vectors from [Stage 2](#stage-2) and pass it through the decoder to reconstruct the image.
+To generate the images from VQGAN, we generate the quantized vectors from [Stage 2](#stage-2) and pass them through the decoder to reconstruct the image.
 
 ---
 
@@ -144,12 +144,15 @@ To generate the images from VQGAN, we generate the quantized vectors from [Stage
 <img align="right" src="./utils/assets/sliding_window.png" width="300"/>
 
 
-This stage contains Transformers 🤖 which are trained to predict the next latent vector from the sequence of previous latent vectors. 
+This stage contains Transformers 🤖 which are trained to predict the next latent vector from the sequence of previous latent vectors in the quantized encoder output. The paper uses [`mingpt.py`](transformers/mingpt.py) from Andrej Karpathy's [karpathy/minGPT](https://github.com/karpathy/minGPT) repo. 
 
-Due to computation constraints, to generate high-resolution images, they use a sliding attention window to predict the next latent vector from its neighbor vectors in the quantized encoder output.   
+Due to computation constraints of generating high-resolution images, they also use a sliding attention window to predict the next latent vector from its neighbor vectors in the quantized encoder output.   
 
 ## Setup 
 
+1. Clone the repo - `https://github.com/Shubhamai/pytorch-vqgan`
+2. Create a new conda environment using `conda env create --prefix env python=3.7.13 --file=environment.yml`
+3. Activate the conda environment using `conda activate ./env`
 
 ## Usage
 
@@ -179,7 +182,7 @@ The list here contains some helpful blogs or videos that helped me a bunch in un
 2. [VQGAN: Taming Transformers for High-Resolution Image Synthesis [Paper Explained]](https://youtu.be/-wDSDtIAyWQ) by Gradient Dude
 3. [VQ-GAN: Taming Transformers for High-Resolution Image Synthesis | Paper Explained](https://youtu.be/j2PXES-liuc) by The AI Epiphany
 4. [VQ-GAN | Paper Explanation](https://youtu.be/wcqLFDXaDO8) and [VQ-GAN | PyTorch Implementation](https://youtu.be/_Br5WRwUz_U) by Outlier
-
+5. [TL#006 Robin Rombach Taming Transformers for High Resolution Image Synthesis](https://youtu.be/fy153-yXSQk) by one of the paper's author - Robin Rombach. Thanks for the talk :)
 
 ## BibTeX
 

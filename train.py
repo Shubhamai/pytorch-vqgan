@@ -4,12 +4,14 @@ from torchsummary import summary
 
 from trainer import VQGANTrainer
 
-# trainer = VQGANTrainer()
+trainer = VQGANTrainer()
 
-from vqgan import Encoder
+# summary(trainer.vqgan.encoder,  input_data=torch.rand((1, 1, 256, 256)), col_names = ["input_size", "output_size", "num_params"],
+#     device = "cuda",
+#     depth = 2,)
 
-image = torch.randn(1, 3, 256, 256)
+# summary(trainer.vqgan.decoder,  input_data=torch.rand((1, 256, 16, 16)), col_names = ["input_size", "output_size", "num_params"],
+#     device = "cuda",
+#     depth = 2,)
 
-summary(
-        Encoder(), input_data=image, col_names=["input_size", "num_params"], device="cpu", depth=2
-    )
+trainer.train()

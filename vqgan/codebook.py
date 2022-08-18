@@ -1,5 +1,8 @@
 """
-Contains class for the Codebook.
+https://github.com/dome272/VQGAN-pytorch/blob/main/codebook.py
+
+Contains the implementation of the codebook for the VQGAN. 
+With each forward pass, it returns the loss, indices of min distance latent vectors between codebook and encoder output and latent vector with minimim distance. 
 """
 
 # Importing Libraries
@@ -24,7 +27,9 @@ class CodeBook(nn.Module):
         beta (int): Beta value for the commitment loss.
     """
 
-    def __init__(self, num_codebook_vectors: int, latent_dim: int, beta: int = 1):
+    def __init__(
+        self, num_codebook_vectors: int = 1024, latent_dim: int = 256, beta: int = 0.25
+    ):
         super().__init__()
 
         self.num_codebook_vectors = num_codebook_vectors
@@ -66,7 +71,7 @@ class CodeBook(nn.Module):
             torch.sum(
                 z_flattened**2, dim=1, keepdim=True
             )  # keepdim = True to keep the same original shape after the sum
-            + torch.sum((self.codebook.weight**2), dim=1)
+            + torch.sum(self.codebook.weight**2, dim=1)
             - 2
             * torch.matmul(
                 z_flattened, self.codebook.weight.t()
@@ -89,7 +94,9 @@ class CodeBook(nn.Module):
         just a note :)
         """
         loss = torch.mean(
-            torch.sum((z_q.detach() - z) ** 2)  # detach() to avoid calculating gradient while backpropagating
+            torch.sum(
+                (z_q.detach() - z) ** 2
+            )  # detach() to avoid calculating gradient while backpropagating
             + self.beta
             * torch.mean(
                 (z_q - z.detach()) ** 2

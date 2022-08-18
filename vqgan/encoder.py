@@ -1,4 +1,6 @@
 """
+https://github.com/dome272/VQGAN-pytorch/blob/main/encoder.py
+
 Contains the encoder implementation of VQGAN. 
 
 The encoder is highly inspired by the - Denoising Diffusion Probabilistic Models - https://arxiv.org/abs/2006.11239
@@ -6,11 +8,6 @@ According to the official implementation.
 """
 
 # Importing Libraries
-from distutils.sysconfig import get_makefile_filename
-from imp import get_frozen_object
-from os import get_blocking
-from sre_parse import GLOBAL_FLAGS
-from turtle import ht
 import torch
 import torch.nn as nn
 

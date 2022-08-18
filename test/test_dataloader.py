@@ -5,11 +5,7 @@ def test_load_mnist():
 
     dataloader = load_mnist(batch_size=16)
 
-    for batch in dataloader:
-        print(batch[0].shape)
-        print(batch[1].shape)
-
-        # print()
+    for (imgs, _) in dataloader:
         break
 
-    assert batch.shape == (16, 28, 28)
+    assert imgs.shape == (16, 1, 28, 28)

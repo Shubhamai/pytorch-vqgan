@@ -1,4 +1,6 @@
 """
+https://github.com/dome272/VQGAN-pytorch/blob/main/decoder.py
+
 Contains the decoder implementation of VQGAN.
 
 The decoder architecture is also highly inspired by the - Denoising Diffusion Probabilistic Models - https://arxiv.org/abs/2006.11239

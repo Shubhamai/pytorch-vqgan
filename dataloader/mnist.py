@@ -34,7 +34,7 @@ def load_mnist(
                     torchvision.transforms.Normalize((0.1307,), (0.3081,)),
                 ]
             ),
-        ).data,
+        ),
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,

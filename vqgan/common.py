@@ -1,5 +1,7 @@
 """
-The file contains common modules and layers for the VQGAN encoder and decoder blocks.
+https://github.com/dome272/VQGAN-pytorch/blob/main/helper.py
+
+The file contains Swish, Group Norm, Residual & Non-Local Blocks,  Upsample and Downsample layer for VQGAN encoder and decoder blocks.
 """
 
 # Importing Libraries
@@ -128,7 +130,7 @@ class UpsampleBlock(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-        x = torch.nn.functional.interpolate(x, scale_factor=2.0, mode="nearest")
+        x = torch.nn.functional.interpolate(x, scale_factor=2.0)
 
         return self.conv(x)
 

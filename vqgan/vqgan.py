@@ -1,5 +1,7 @@
 """
-Implementing the main VQGAN
+https://github.com/dome272/VQGAN-pytorch/blob/main/vqgan.py
+
+Implementing the main VQGAN, containing forward pass, lambda calculation, and to "enable" discriminator loss after a certain number of global steps.
 """
 
 # Importing Libraries
@@ -36,17 +38,39 @@ class VQGAN(nn.Module):
         latent_channels: int = 256,
         latent_size: int = 16,
         intermediate_channels: list = [512, 256, 256, 128, 128],
-        num_residual_blocks_encoder: int = 3,
+        num_residual_blocks_encoder: int = 2,
         num_residual_blocks_decoder: int = 3,
         dropout: float = 0.0,
         attention_resolution: list = [16],
+
+        num_codebook_vectors:int=1024,
     ):
 
         super().__init__()
-
-        self.encoder = Encoder()
-        self.decoder = Decoder()
-        self.codebook = CodeBook()
+        self.encoder = Encoder(
+            img_channels=img_channels,
+            image_size=img_size,
+            latent_channels=latent_channels,
+            latent_size=latent_size,
+            intermediate_channels=intermediate_channels[:],
+            num_residual_blocks=num_residual_blocks_encoder,
+            dropout=dropout,
+            attention_resolution=attention_resolution,
+        )
+        
+        self.decoder = Decoder(
+            img_channels=img_channels,
+            image_size=img_size,
+            latent_channels=latent_channels,
+            latent_size=latent_size,
+            intermediate_channels=intermediate_channels[:],
+            num_residual_blocks=num_residual_blocks_decoder,
+            dropout=dropout,
+            attention_resolution=attention_resolution,
+        )
+        self.codebook = CodeBook(
+            num_codebook_vectors=num_codebook_vectors, latent_dim=latent_channels
+        )
 
         self.quant_conv = nn.Conv2d(latent_channels, latent_channels, 1)
         self.post_quant_conv = nn.Conv2d(latent_channels, latent_channels, 1)
@@ -61,29 +85,32 @@ class VQGAN(nn.Module):
             torch.Tensor: Output tensor from the decoder.
         """
 
-        x = self.encoder(x)
-        quant_x = self.quant_conv(x)
+        encoded_images = self.encoder(x)
+        quant_x = self.quant_conv(encoded_images)
 
         codebook_mapping, codebook_indices, codebook_loss = self.codebook(quant_x)
 
         post_quant_x = self.post_quant_conv(codebook_mapping)
-        x = self.decoder(post_quant_x)
+        decoded_images = self.decoder(post_quant_x)
 
-        return x, codebook_indices, codebook_loss
+        return decoded_images, codebook_indices, codebook_loss
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
 
         x = self.encoder(x)
         quant_x = self.quant_conv(x)
 
-        z_q, min_distance_indices, q_loss = self.codebook(quant_x)
+        codebook_mapping, codebook_indices, q_loss = self.codebook(quant_x)
 
-        return z_q, min_distance_indices, q_loss
+        return codebook_mapping, codebook_indices, q_loss
 
     def decode(self, x: torch.Tensor) -> torch.Tensor:
 
         x = self.post_quant_conv(x)
         x = self.decoder(x)
+
+        return x
+
 
     def calculate_lambda(self, perceptual_loss, gan_loss):
         """Calculating lambda shown in the eq. 7 of the paper
