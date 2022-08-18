@@ -1,6 +1,11 @@
 # Importing Libraries
-from torchsummary import summary
+import glob
+import os
+import shutil
+
+import imageio
 import torch
+from torchsummary import summary
 
 
 def print_summary(
@@ -19,7 +24,7 @@ def print_summary(
 
 
 def weights_init(m):
-    """ Setting up the weights for the discriminator model. 
+    """Setting up the weights for the discriminator model.
     This is mentioned in the original PatchGAN paper, in page 16, section 6.2 - Training Details
 
     ```
@@ -32,10 +37,35 @@ def weights_init(m):
     Args:
         m
     """
-    
+
     classname = m.__class__.__name__
     if classname.find("Conv") != -1:
         torch.nn.init.normal_(m.weight.data, 0.0, 0.02)
     elif classname.find("BatchNorm") != -1:
         torch.nn.init.normal_(m.weight.data, 1.0, 0.02)
         torch.nn.init.constant_(m.bias.data, 0)
+
+
+def generate_gif(imgs_path: str, save_path: str):
+    """Generates a gif from a directory of images.
+
+    Args:
+        imgs_path: Path to the directory of images.
+        save_path: Path to save the gif.
+    """
+
+    with imageio.get_writer(save_path, mode="I") as writer:
+        for filename in glob.glob(imgs_path + "/*.jpg"):
+            image = imageio.imread(filename)
+            writer.append_data(image)
+
+
+def clean_directory(directory: str):
+    """Cleans a directory.
+    Args:
+        directory: Path to the directory.
+    """
+
+    if os.path.exists(directory):
+        shutil.rmtree(directory)
+    os.mkdir(directory)

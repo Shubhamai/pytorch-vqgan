@@ -22,7 +22,6 @@ class Decoder(nn.Module):
 
     Args:
         img_channels (int): Number of channels in the output image.
-        image_size (int): Size of the input image, only used in encoder (height or width ).
         latent_channels (int): Number of channels in the latent vector.
         latent_size (int): Size of the latent vector.
         intermediate_channels (list): List of channels in the intermediate layers.
@@ -34,7 +33,6 @@ class Decoder(nn.Module):
     def __init__(
         self,
         img_channels: int = 3,
-        image_size: int = 256,
         latent_channels: int = 256,
         latent_size: int = 16,
         intermediate_channels: list = [128, 128, 256, 256, 512],

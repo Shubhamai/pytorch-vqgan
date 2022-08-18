@@ -45,7 +45,6 @@ def test_decoder():
     latent = torch.randn(1, latent_channels, latent_size, latent_size)
     model = Decoder(
         img_channels=img_channels,
-        image_size=img_size,
         latent_size=latent_size,
         latent_channels=latent_channels,
         attention_resolution=[attn_resolution],

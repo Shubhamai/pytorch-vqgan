@@ -23,10 +23,11 @@ class VQGAN(nn.Module):
         latent_channels (int, optional): Number of channels in the latent vector. Defaults to 256.
         latent_size (int, optional): Size of the latent vector. Defaults to 16.
         intermediate_channels (list, optional): List of channels in the intermediate layers of encoder and decoder. Defaults to [128, 128, 256, 256, 512].
-        num_residual_blocks_encoder (int, optional): Number of residual blocks in the encoder. Defaults to 3.
+        num_residual_blocks_encoder (int, optional): Number of residual blocks in the encoder. Defaults to 2.
         num_residual_blocks_decoder (int, optional): Number of residual blocks in the decoder. Defaults to 3.
         dropout (float, optional): Dropout probability. Defaults to 0.0.
         attention_resolution (list, optional): Resolution of the attention mechanism. Defaults to [16].
+        num_codebook_vectors (int, optional): Number of codebook vectors. Defaults to 1024.
     """
 
     def __init__(
@@ -40,8 +41,7 @@ class VQGAN(nn.Module):
         num_residual_blocks_decoder: int = 3,
         dropout: float = 0.0,
         attention_resolution: list = [16],
-
-        num_codebook_vectors:int=1024,
+        num_codebook_vectors: int = 1024,
     ):
 
         super().__init__()
@@ -49,19 +49,17 @@ class VQGAN(nn.Module):
             img_channels=img_channels,
             image_size=img_size,
             latent_channels=latent_channels,
-            latent_size=latent_size,
-            intermediate_channels=intermediate_channels[:],
+            intermediate_channels=intermediate_channels[:], # shallow copy of the link
             num_residual_blocks=num_residual_blocks_encoder,
             dropout=dropout,
             attention_resolution=attention_resolution,
         )
-        
+
         self.decoder = Decoder(
             img_channels=img_channels,
-            image_size=img_size,
             latent_channels=latent_channels,
             latent_size=latent_size,
-            intermediate_channels=intermediate_channels[:],
+            intermediate_channels=intermediate_channels[:], # shallow copy of the link
             num_residual_blocks=num_residual_blocks_decoder,
             dropout=dropout,
             attention_resolution=attention_resolution,
@@ -108,7 +106,6 @@ class VQGAN(nn.Module):
         x = self.decoder(x)
 
         return x
-
 
     def calculate_lambda(self, perceptual_loss, gan_loss):
         """Calculating lambda shown in the eq. 7 of the paper

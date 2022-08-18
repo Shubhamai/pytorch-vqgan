@@ -22,7 +22,6 @@ class Encoder(nn.Module):
         img_channels (int): Number of channels in the input image.
         image_size (int): Size of the input image, only used in encoder (height or width ).
         latent_channels (int): Number of channels in the latent vector.
-        latent_size (int): Size of the latent vector, only used in decoder. 
         intermediate_channels (list): List of channels in the intermediate layers.
         num_residual_blocks (int): Number of residual blocks b/w each downsample block.
         dropout (float): Dropout probability for residual blocks.
@@ -34,7 +33,6 @@ class Encoder(nn.Module):
         img_channels: int = 3,
         image_size: int = 256,
         latent_channels: int = 256,
-        latent_size:int = 16,
         intermediate_channels: list = [128, 128, 256, 256, 512],
         num_residual_blocks: int = 2,
         dropout: float = 0.0,

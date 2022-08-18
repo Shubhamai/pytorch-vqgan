@@ -158,6 +158,9 @@ Due to computation constraints of generating high-resolution images, they also u
 
 ### Training
 
+To train the model, simply run 
+`python train.py`
+
 ### Testing
 
 ### Visualizing
