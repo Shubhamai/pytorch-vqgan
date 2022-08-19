@@ -45,6 +45,9 @@ class VQGAN(nn.Module):
     ):
 
         super().__init__()
+        
+        self.img_channels = img_channels
+
         self.encoder = Encoder(
             img_channels=img_channels,
             image_size=img_size,
@@ -162,3 +165,8 @@ class VQGAN(nn.Module):
         """Loads the checkpoint from the given path."""
 
         self.load_state_dict(torch.load(path))
+
+    def save_checkpoint(self, path):
+        """Saves the checkpoint to the given path."""
+
+        torch.save(self.state_dict(), path)

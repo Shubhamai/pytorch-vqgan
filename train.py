@@ -1,28 +1,55 @@
 # Importing Libraries
-from trainer import VQGANTrainer
+import argparse
+import os
+
+import yaml
+
 from dataloader import load_dataloader
+from trainer import VQGANTrainer
 from utils import reproducibility
 from vqgan import VQGAN
 
-# Reproducibility
-reproducibility(42)
 
-model = VQGAN(
-            img_channels=1,
-            # img_size=img_size,
-            # latent_channels=latent_channels,
-            # latent_size=latent_size,
-            # intermediate_channels=intermediate_channels,
-            # num_residual_blocks_encoder=num_residual_blocks_encoder,
-            # num_residual_blocks_decoder=num_residual_blocks_decoder,
-            # dropout=dropout,
-            # attention_resolution=attention_resolution,
-            # num_codebook_vectors=num_codebook_vectors,
-        ).to("cuda")
+def main(args):
+    """
+    Main function for training the VQGAN ( Stage 1 )
+    """
 
-# Setting up the trainer
-trainer = VQGANTrainer(model=model, img_channels=1)
+    # Reproducibility
+    reproducibility(config["seed"])
 
-# Training the model 
-dataloader = load_dataloader(name="mnist", save_path="data", batch_size=1, image_size=256, num_workers=4)
-trainer.train(epochs=100, dataloader=dataloader)
+    model = VQGAN(**config["model"]).to(config["device"])
+
+    # Setting up the trainer
+    trainer = VQGANTrainer(model=model, **config["trainer"])
+
+    # Training the model
+    dataloader = load_dataloader(
+        **config["dataloader"],
+        image_size=config["model"]["img_size"],
+    )
+    trainer.train(
+        epochs=config["epochs"],
+        dataloader=dataloader,
+        limit_steps=config["limit_steps"],
+    )
+
+    # Saving the model
+    model.save_checkpoint(os.path.join(config["trainer"]["experiment_dir"], "model.pt"))
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config_path",
+        type=str,
+        default="configs/mnist.yml",
+        help="path to config file",
+    )
+
+    args = parser.parse_args()
+    with open(args.config_path) as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    main(config)

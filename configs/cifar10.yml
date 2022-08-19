@@ -1,5 +1,5 @@
 # global params
-run : "mnist"
+run : "cifar10"
 
 device: "cuda"
 seed: 42
@@ -29,7 +29,7 @@ trainer:
 
 # Model Params
 model:
-  img_channels: 1
+  img_channels: 3
   img_size: 256
   latent_channels: 256
   latent_size: 16
@@ -42,7 +42,7 @@ model:
 
 # Data params
 dataloader:
-  name: "mnist"
+  name: "cifar10"
   save_path: "data"
   batch_size: 1
   num_workers: 4

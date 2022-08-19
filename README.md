@@ -154,10 +154,18 @@ Due to computation constraints of generating high-resolution images, they also u
 
 ## Usage
 
+<img align="right" src="./utils/assets/reconstruction.gif" width="250" />
+
+
 ### Training
 
-To train the model, simply run 
-`python train.py`
+You can start the training by running `python train.py`. It reads the default config file from `configs/mnist.yml` . To change the config path, run - `python train.py --config_path configs/mnist.yaml`. 
+
+Here's what mostly the script does -  
+- Downloads the MNIST dataset automatically and save in the [data](/data) directory ( specified in config ).
+- Training the VQGAN model on the MNIST train set with parameters passed from the config file.
+- The training metrics and visualizations are saved in the [experiments/results](/experiments/results) directory with the corresponding `run` name.
+- The model is automatically saved in the [experiments/models/](/experiments/models/) with the corresponding `run` name after training is complete.
 
 ### Testing
 

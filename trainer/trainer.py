@@ -7,24 +7,22 @@ import os
 
 import imageio
 import lpips
+import numpy as np
 import torch
 import torch.nn.functional as F
 import torchvision
-
-from dataloader import load_dataloader
-from utils import weights_init, generate_gif, clean_directory
-from vqgan import VQGAN, Discriminator
+from utils import clean_directory, weights_init
+from vqgan import Discriminator
+import skimage
 
 
 class VQGANTrainer:
-    """Trainer class for VQGAN, contains step, train, and test methods"""
+    """Trainer class for VQGAN, contains step, train methods"""
 
     def __init__(
         self,
         model: torch.nn.Module,
         device: str or torch.device = "cuda",
-        # VQ parameters
-        img_channels: int = 3,
         # Discriminator parameters
         disc_factor: float = 1.0,
         disc_start: int = 100,
@@ -35,10 +33,10 @@ class VQGANTrainer:
         learning_rate: float = 2.25e-05,
         beta1: float = 0.5,
         beta2: float = 0.9,
-        save_every: int = 100,
         # Miscellaneous parameters
         experiment_dir: str = "./experiments",
         perceptual_model: str = "vgg",
+        save_every: int = 10,
     ):
 
         self.device = device
@@ -47,7 +45,9 @@ class VQGANTrainer:
         self.vqgan = model
 
         # Discriminator parameters
-        self.discriminator = Discriminator(image_channels=img_channels).to(self.device)
+        self.discriminator = Discriminator(image_channels=self.vqgan.img_channels).to(
+            self.device
+        )
         self.discriminator.apply(weights_init)
 
         # Loss parameters
@@ -66,7 +66,7 @@ class VQGANTrainer:
 
         # Save directory
         self.expriment_save_dir = experiment_dir
-        clean_directory(self.expriment_save_dir + "/reconstructed_imgs")
+        clean_directory(self.expriment_save_dir)
 
         # Miscellaneous
         self.global_step = 0
@@ -161,12 +161,18 @@ class VQGANTrainer:
 
         return decoded_images, vq_loss, gan_loss
 
-    def train(self, epochs: int = 100, dataloader: torch.utils.data.DataLoader = None):
+    def train(
+        self,
+        dataloader: torch.utils.data.DataLoader,
+        epochs: int = 1,
+        limit_steps: int = -1,
+    ):
         """Trains the VQGAN for the given number of epochs
 
         Args:
+            dataloader (torch.utils.data.DataLoader): dataloader to use.
             epochs (int, optional): number of epochs to train for. Defaults to 100.
-            dataloader (torch.utils.data.DataLoader, optional): dataloader to use. Defaults to None.
+            limit_iterations (int, optional): training the model on a limited number of iterations. Defaults to -1, meaning all step from the dataloader.
         """
 
         for epoch in range(epochs):
@@ -180,59 +186,42 @@ class VQGANTrainer:
                 # Updating global step
                 self.global_step += 1
 
+                if limit_steps != -1 and self.global_step >= limit_steps:
+                    print("[INFO] Maximum number of steps reached, exiting")
+                    break
+
                 if index % self.save_every == 0:
-                    self.sample_batch = (
-                        imgs[:1] if self.sample_batch is None else self.sample_batch
-                    )
-
-                    with torch.no_grad():
-
-                        self.gif_images.append(
-                            torchvision.utils.make_grid(
-                                torch.cat(
-                                    (
-                                        self.sample_batch,
-                                        self.vqgan(self.sample_batch)[0],
-                                    ),
-                                )
-                            )
-                            .detach()
-                            .cpu()
-                            .permute(1, 2, 0)
-                            .numpy()
-                        )
-
-                        real_fake_images = torch.cat((imgs[:4], decoded_images[:4]))
-
-                        torchvision.utils.save_image(
-                            real_fake_images,
-                            os.path.join(
-                                self.expriment_save_dir,
-                                "reconstructed_imgs",
-                                f"epoch-{epoch}_step-{index}.jpg",
-                            ),
-                            nrow=4,
-                        )
 
                     print(
                         f"Epoch: {epoch+1}/{epochs} | Batch: {index}/{len(dataloader)} | VQ Loss : {vq_loss:.4f} | Discriminator Loss: {gan_loss:.4f}"
                     )
 
-                    if index % 100 == 0:
-
-                        # Saving model
-                        torch.save(
-                            self.vqgan.state_dict(),
-                            os.path.join(
-                                self.expriment_save_dir, f"vqgan_epoch_{epoch}.pt"
-                            ),
+                    # Only saving the gif for the first 20 save steps
+                    if self.global_step // self.save_every <= 20:
+                        self.sample_batch = (
+                            imgs[:1] if self.sample_batch is None else self.sample_batch
                         )
 
-                        # Saving gif
-                        # generate_gif(
-                        #     os.path.join(self.expriment_save_dir, "reconstructed_imgs"),
-                        #     os.path.join(
-                        #         self.expriment_save_dir, "reconstructed_imgs.gif"
-                        #     ),
-                        # )
-                        imageio.mimsave("movie.gif", self.gif_images, fps=5)
+                        with torch.no_grad():
+
+                            self.gif_images.append(
+                                
+                                    torchvision.utils.make_grid(
+                                        torch.cat(
+                                            (
+                                                self.sample_batch,
+                                                self.vqgan(self.sample_batch)[0],
+                                            ),
+                                        )
+                                    )
+                                    .detach()
+                                    .cpu()
+                                    .permute(1, 2, 0)
+                                    .numpy()
+                            )
+
+                        imageio.mimsave(
+                            os.path.join(self.expriment_save_dir, "reconstruction.gif"),
+                            self.gif_images,
+                            fps=5,
+                        )
