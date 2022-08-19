@@ -107,8 +107,6 @@ The above loss is for the discriminator which takes in real and generated images
 
 The discrimination here is a bit different than conventional discriminators in that, instead of taking whole images as an input, they instead convert the images into patches using convolution and then predict which patch is real or fake.  
 
-<br>
-
 ---
 
 $$

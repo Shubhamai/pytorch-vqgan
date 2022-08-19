@@ -1,9 +1,11 @@
 # Importing Libraries
 import glob
 import os
+import random
 import shutil
 
 import imageio
+import numpy as np
 import torch
 from torchsummary import summary
 
@@ -69,3 +71,30 @@ def clean_directory(directory: str):
     if os.path.exists(directory):
         shutil.rmtree(directory)
     os.mkdir(directory)
+
+
+def reproducibility(seed: int = 42):
+    """Set the random seed.
+
+    Args:
+        seed (int): The seed to use.
+
+    Returns:
+        None
+    """
+
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+
+    np.random.seed(seed)
+    random.seed(seed)
+
+
+def collate_fn(batch):
+    """
+    Collate function for the dataloader like mnist or cifar10.
+    """
+
+    imgs = torch.stack([img[0] for img in batch])
+
+    return imgs

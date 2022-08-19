@@ -1,5 +1,8 @@
+# Importing Libraries
 import torch
 import torchvision
+
+from utils import collate_fn
 
 
 def load_mnist(
@@ -21,24 +24,27 @@ def load_mnist(
     """
 
     # Load the data
-    dataloader = torch.utils.data.DataLoader(
-        torchvision.datasets.MNIST(
-            root=save_path,
-            train=True,
-            download=True,
-            transform=torchvision.transforms.Compose(
-                [
-                    torchvision.transforms.Resize((image_size, image_size)),
-                    torchvision.transforms.Grayscale(num_output_channels=1),
-                    torchvision.transforms.ToTensor(),
-                    torchvision.transforms.Normalize((0.1307,), (0.3081,)),
-                ]
-            ),
+    mnist_data = torchvision.datasets.MNIST(
+        root=save_path,
+        train=True,
+        download=True,
+        transform=torchvision.transforms.Compose(
+            [
+                torchvision.transforms.Resize((image_size, image_size)),
+                torchvision.transforms.Grayscale(num_output_channels=1),
+                torchvision.transforms.ToTensor(),
+                torchvision.transforms.Normalize((0.1307,), (0.3081,)),
+            ]
         ),
+    )
+
+    dataloader = torch.utils.data.DataLoader(
+        mnist_data,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
         pin_memory=True,
+        collate_fn=collate_fn,
     )
 
     return dataloader

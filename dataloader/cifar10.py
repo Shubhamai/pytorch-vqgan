@@ -1,5 +1,8 @@
+# Importing Libraries
 import torch
 import torchvision
+
+from utils import collate_fn
 
 
 def load_cifar10(
@@ -38,6 +41,7 @@ def load_cifar10(
         shuffle=True,
         num_workers=num_workers,
         pin_memory=True,
+        collate_fn=collate_fn,
     )
 
     return dataloader
