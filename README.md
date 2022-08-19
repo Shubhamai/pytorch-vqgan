@@ -162,10 +162,9 @@ Due to computation constraints of generating high-resolution images, they also u
 You can start the training by running `python train.py`. It reads the default config file from `configs/mnist.yml` . To change the config path, run - `python train.py --config_path configs/mnist.yaml`. 
 
 Here's what mostly the script does -  
-- Downloads the MNIST dataset automatically and save in the [data](/data) directory ( specified in config ).
+- Downloads the MNIST dataset automatically and saved in the [data](/data) directory ( specified in config ).
 - Training the VQGAN model on the MNIST train set with parameters passed from the config file.
-- The training metrics and visualizations are saved in the [experiments/results](/experiments/results) directory with the corresponding `run` name.
-- The model is automatically saved in the [experiments/models/](/experiments/models/) with the corresponding `run` name after training is complete.
+- The training metrics, visualizations and model are saved in the [experiments/](/experiments/) directory with the corresponding path specified in the config file.
 
 ### Testing
 
@@ -182,6 +181,14 @@ To run tests, run `pytest --cov-config=.coveragerc --cov=. test`
 ### TODOs  
 
 ## Hardware requirements
+
+The hardware which I tried the model on default settings is  - 
+- Ryzen 5 4600H
+- NVIDIA GeForce GTX 1660Ti - 6 GB VRAM
+- 12 GB ram
+
+It took around 2-3 min to get good reconstruction results. Since, google colab has similar hardware in terms compute power from what I understand, it should run just fine on colab :)
+
 
 ## Shoutouts
 

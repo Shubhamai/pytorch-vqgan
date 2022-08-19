@@ -196,29 +196,35 @@ class VQGANTrainer:
                         f"Epoch: {epoch+1}/{epochs} | Batch: {index}/{len(dataloader)} | VQ Loss : {vq_loss:.4f} | Discriminator Loss: {gan_loss:.4f}"
                     )
 
-                    # Only saving the gif for the first 20 save steps
-                    if self.global_step // self.save_every <= 20:
+                    # Only saving the gif for the first 2000 save steps
+                    if self.global_step // self.save_every <= 2000:
                         self.sample_batch = (
-                            imgs[:1] if self.sample_batch is None else self.sample_batch
+                            imgs[:] if self.sample_batch is None else self.sample_batch
                         )
 
                         with torch.no_grad():
 
-                            self.gif_images.append(
-                                
-                                    torchvision.utils.make_grid(
-                                        torch.cat(
-                                            (
-                                                self.sample_batch,
-                                                self.vqgan(self.sample_batch)[0],
-                                            ),
-                                        )
+                            gif_img = (
+                                torchvision.utils.make_grid(
+                                    torch.cat(
+                                        (
+                                            self.sample_batch,
+                                            self.vqgan(self.sample_batch)[0],
+                                        ),
                                     )
-                                    .detach()
-                                    .cpu()
-                                    .permute(1, 2, 0)
-                                    .numpy()
+                                )
+                                .detach()
+                                .cpu()
+                                .permute(1, 2, 0)
+                                .numpy()
                             )
+
+                            gif_img = (gif_img - gif_img.min()) * (
+                                255 / (gif_img.max() - gif_img.min())
+                            )
+                            gif_img = gif_img.astype(np.uint8)
+
+                            self.gif_images.append(gif_img)
 
                         imageio.mimsave(
                             os.path.join(self.expriment_save_dir, "reconstruction.gif"),

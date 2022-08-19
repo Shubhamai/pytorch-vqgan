@@ -1,6 +1,4 @@
 # global params
-run : "mnist"
-
 device: "cuda"
 seed: 42
 epochs : 1
@@ -21,11 +19,11 @@ trainer:
   # Loss parameters
   perceptual_loss_factor : 1.0
   perceptual_model: "vgg"
-  rec_loss_factor : 1.0
+  rec_loss_factor : 1.0 
 
   # Miscellaneous parameters
   save_every: 10
-  experiment_dir: "./experiments"
+  experiment_dir: "./experiments/mnist"
 
 # Model Params
 model:
@@ -44,5 +42,5 @@ model:
 dataloader:
   name: "mnist"
   save_path: "data"
-  batch_size: 1
+  batch_size: 2
   num_workers: 4

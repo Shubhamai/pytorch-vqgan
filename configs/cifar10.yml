@@ -1,10 +1,8 @@
 # global params
-run : "cifar10"
-
 device: "cuda"
 seed: 42
 epochs : 1
-limit_steps : 400 # use -1 if you want to train for all steps
+limit_steps : -1 # use -1 if you want to train for all steps
 
 # trainer params
 trainer:
@@ -16,7 +14,7 @@ trainer:
 
   # Discriminator parameters
   disc_factor: 1.0
-  disc_start: 100
+  disc_start: 500
 
   # Loss parameters
   perceptual_loss_factor : 1.0
@@ -25,7 +23,7 @@ trainer:
 
   # Miscellaneous parameters
   save_every: 10
-  experiment_dir: "./experiments"
+  experiment_dir: "./experiments/cifar10"
 
 # Model Params
 model:

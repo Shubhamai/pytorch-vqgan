@@ -21,7 +21,7 @@ def main(args):
     model = VQGAN(**config["model"]).to(config["device"])
 
     # Setting up the trainer
-    trainer = VQGANTrainer(model=model, **config["trainer"])
+    trainer = VQGANTrainer(model=model, **config["trainer"], device=config["device"])
 
     # Training the model
     dataloader = load_dataloader(
