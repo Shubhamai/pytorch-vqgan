@@ -11,9 +11,9 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torchvision
+from aim import Image, Run
 from utils import clean_directory, weights_init
 from vqgan import Discriminator
-import skimage
 
 
 class VQGANTrainer:
@@ -22,23 +22,25 @@ class VQGANTrainer:
     def __init__(
         self,
         model: torch.nn.Module,
-        device: str or torch.device = "cuda",
-        # Discriminator parameters
-        disc_factor: float = 1.0,
-        disc_start: int = 100,
-        # Loss parameters
-        perceptual_loss_factor: float = 1.0,
-        rec_loss_factor: float = 1.0,
+        run: Run,
         # Training parameters
+        device: str or torch.device = "cuda",
         learning_rate: float = 2.25e-05,
         beta1: float = 0.5,
         beta2: float = 0.9,
+        # Loss parameters
+        perceptual_loss_factor: float = 1.0,
+        rec_loss_factor: float = 1.0,
+        # Discriminator parameters
+        disc_factor: float = 1.0,
+        disc_start: int = 100,
         # Miscellaneous parameters
         experiment_dir: str = "./experiments",
         perceptual_model: str = "vgg",
         save_every: int = 10,
     ):
 
+        self.run = run
         self.device = device
 
         # VQGAN parameters
@@ -66,7 +68,6 @@ class VQGANTrainer:
 
         # Save directory
         self.expriment_save_dir = experiment_dir
-        clean_directory(self.expriment_save_dir)
 
         # Miscellaneous
         self.global_step = 0
@@ -144,6 +145,14 @@ class VQGANTrainer:
         d_loss_real = torch.mean(F.relu(1.0 - disc_real))
         d_loss_fake = torch.mean(F.relu(1.0 + disc_fake))
         gan_loss = disc_factor * 0.5 * (d_loss_real + d_loss_fake)
+
+        # ======================================================================================================================
+        # Tracking metrics
+
+        self.run.track(perceptual_rec_loss, name="Perceptual & Reconstruction loss", step=self.global_step)
+
+        self.run.track(vq_loss, name="VQ Loss", step=self.global_step)
+        self.run.track(gan_loss, name="GAN Loss", step=self.global_step)
 
         # =======================================================================================================================
         # Backpropagation
@@ -224,10 +233,14 @@ class VQGANTrainer:
                             )
                             gif_img = gif_img.astype(np.uint8)
 
+                            self.run.track(
+                                Image(gif_img), name="VQGAN Reconstruction", step=self.global_step
+                            )
+
                             self.gif_images.append(gif_img)
 
-                        imageio.mimsave(
-                            os.path.join(self.expriment_save_dir, "reconstruction.gif"),
-                            self.gif_images,
-                            fps=5,
-                        )
+                        # imageio.mimsave(
+                        #     os.path.join(self.expriment_save_dir, "reconstruction.gif"),
+                        #     self.gif_images,
+                        #     fps=5,
+                        # )

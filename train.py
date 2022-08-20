@@ -1,6 +1,9 @@
 # Importing Libraries
 import argparse
 import os
+from unicodedata import name
+
+from aim import Run
 
 import yaml
 
@@ -10,7 +13,7 @@ from utils import reproducibility
 from vqgan import VQGAN
 
 
-def main(args):
+def main(config: dict):
     """
     Main function for training the VQGAN ( Stage 1 )
     """
@@ -20,8 +23,14 @@ def main(args):
 
     model = VQGAN(**config["model"]).to(config["device"])
 
+    # Experiment tracker
+    run = Run(experiment=config['name'])
+    run["hparams"] = config
+
     # Setting up the trainer
-    trainer = VQGANTrainer(model=model, **config["trainer"], device=config["device"])
+    trainer = VQGANTrainer(
+        model=model, run=run, device=config["device"], **config["trainer"], 
+    )
 
     # Training the model
     dataloader = load_dataloader(

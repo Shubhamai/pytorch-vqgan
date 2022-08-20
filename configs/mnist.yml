@@ -1,4 +1,6 @@
 # global params
+name : "mnist"
+
 device: "cuda"
 seed: 42
 epochs : 1
@@ -23,7 +25,7 @@ trainer:
 
   # Miscellaneous parameters
   save_every: 10
-  experiment_dir: "./experiments/mnist"
+  experiment_dir: "./experiments/"
 
 # Model Params
 model:
