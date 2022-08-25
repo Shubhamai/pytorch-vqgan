@@ -239,8 +239,8 @@ class VQGANTrainer:
 
                             self.gif_images.append(gif_img)
 
-                        # imageio.mimsave(
-                        #     os.path.join(self.expriment_save_dir, "reconstruction.gif"),
-                        #     self.gif_images,
-                        #     fps=5,
-                        # )
+                        imageio.mimsave(
+                            os.path.join(self.expriment_save_dir, "reconstruction.gif"),
+                            self.gif_images,
+                            fps=5,
+                        )

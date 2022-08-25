@@ -25,7 +25,7 @@ trainer:
 
   # Miscellaneous parameters
   save_every: 10
-  experiment_dir: "./experiments/"
+  experiment_dir: "./experiments"
 
 # Model Params
 model:
