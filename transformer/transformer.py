@@ -1,34 +1,35 @@
 # Importing Libraries
 import torch
 import torch.nn as nn
-import torch.functional as F
+import torch.nn.functional as F
 from transformer.mingpt import GPT
-from vqgan.vqgan import VQGAN
 
 
 class VQGANTransformer(nn.Module):
     def __init__(
         self,
-        vqgan_checkpoint_path: str,
-        num_codebook_vectors: int = 512,
+        vqgan: nn.Module,
         sos_token: int = 0,
         pkeep: float = 0.5,
-        device:str="cuda"
+        device: str = "cuda",
+        block_size: int = 512,
+        n_layer: int = 12,
+        n_head: int = 16,
+        n_embd: int = 1024,
     ):
         super().__init__()
 
         self.sos_token = sos_token
         self.device = device
 
-        self.vqgan = VQGAN().load_checkpoint(vqgan_checkpoint_path)
-        self.vqgan.eval()
+        self.vqgan = vqgan
 
         self.transformer = GPT(
-            vocab_size=num_codebook_vectors,
-            block_size=512,
-            n_layer=24,
-            n_head=16,
-            n_embd=1024,
+            vocab_size=self.vqgan.num_codebook_vectors,
+            block_size=block_size,
+            n_layer=n_layer,
+            n_head=n_head,
+            n_embd=n_embd,
         )
 
         self.pkeep = pkeep
@@ -62,7 +63,7 @@ class VQGANTransformer(nn.Module):
             torch.tensor: generated image from decoder
         """
 
-        ix_to_vectors = self.vqgan.codebook.embedding(indices).reshape(
+        ix_to_vectors = self.vqgan.codebook.codebook(indices).reshape(
             indices.shape[0], p1, p2, 256
         )
         ix_to_vectors = ix_to_vectors.permute(0, 3, 1, 2)
@@ -119,27 +120,40 @@ class VQGANTransformer(nn.Module):
         """
         v, ix = torch.topk(logits, k)
         out = logits.clone()
-        out[out < v[..., [-1]]] = -float("inf") # Setting all values except in topk to inf
+        out[out < v[..., [-1]]] = -float(
+            "inf"
+        )  # Setting all values except in topk to inf
         return out
 
     @torch.no_grad()
-    def sample(self, x:torch.Tensor, c:torch.Tensor, steps:int=256, temperature:float=1.0, top_k:int=100):
+    def sample(
+        self,
+        x: torch.Tensor,
+        c: torch.Tensor,
+        steps: int = 256,
+        temperature: float = 1.0,
+        top_k: int = 100,
+    ):
         self.transformer.eval()
-        x = torch.cat((c, x), dim=1) # Appending sos token
+        x = torch.cat((c, x), dim=1)  # Appending sos token
         for k in range(steps):
-            logits, _ = self.transformer(x) # Getting the predicted indices
-            logits = logits[:, -1, :] / temperature # Getting the last prediction and scaling it by temperature
+            logits, _ = self.transformer(x)  # Getting the predicted indices
+            logits = (
+                logits[:, -1, :] / temperature
+            )  # Getting the last prediction and scaling it by temperature
 
             if top_k is not None:
                 logits = self.top_k_logits(logits, top_k)
 
             probs = F.softmax(logits, dim=-1)
 
-            ix = torch.multinomial(probs, num_samples=1) # Note : not sure what's happening here
+            ix = torch.multinomial(
+                probs, num_samples=1
+            )  # Note : not sure what's happening here
 
             x = torch.cat((x, ix), dim=1)
 
-        x = x[:, c.shape[1] :] # Removing the sos token
+        x = x[:, c.shape[1] :]  # Removing the sos token
         self.transformer.train()
         return x
 
@@ -169,3 +183,13 @@ class VQGANTransformer(nn.Module):
         log["full_sample"] = full_sample
 
         return log, torch.concat((x, x_rec, half_sample, full_sample))
+
+    def load_checkpoint(self, path):
+        """Loads the checkpoint from the given path."""
+
+        self.load_state_dict(torch.load(path))
+
+    def save_checkpoint(self, path):
+        """Saves the checkpoint to the given path."""
+
+        torch.save(self.state_dict(), path)

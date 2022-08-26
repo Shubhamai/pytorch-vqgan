@@ -7,30 +7,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
 from tqdm import tqdm
-
-from transformer import VQGANTransformer
+from aim import Run
 
 
 class TransformerTrainer:
     def __init__(
         self,
-        vqgan_checkpoint_path: str,
+        model: nn.Module,
+        run: Run,
         experiment_dir: str = "experiments",
         device: str = "cuda",
     ):
 
         self.experiment_dir = experiment_dir
 
-        self.model = VQGANTransformer(
-            vqgan_checkpoint_path,
-            num_codebook_vectors=512,
-            sos_token=0,
-            pkeep=0.5,
-            device=device,
-        ).to(device)
+        self.model = model
+        self.device = device
         self.optim = self.configure_optimizers()
-
-        self.train()
 
     def configure_optimizers(self):
         decay, no_decay = set(), set()
@@ -68,30 +61,19 @@ class TransformerTrainer:
         optimizer = torch.optim.AdamW(optim_groups, lr=4.5e-06, betas=(0.9, 0.95))
         return optimizer
 
-    def train(self, epochs: int, device: str, dataloader: torch.utils.data.DataLoader):
+    def train(self, dataloader: torch.utils.data.DataLoader, epochs: int):
         for epoch in range(epochs):
-            with tqdm(range(len(dataloader))) as pbar:
-                for i, imgs in zip(pbar, dataloader):
-                    self.optim.zero_grad()
-                    imgs = imgs.to(device=device)
-                    logits, targets = self.model(imgs)
-                    loss = F.cross_entropy(
-                        logits.reshape(-1, logits.size(-1)), targets.reshape(-1)
-                    )
-                    loss.backward()
-                    self.optim.step()
-                    pbar.set_postfix(
-                        Transformer_Loss=np.round(loss.cpu().detach().numpy().item(), 4)
-                    )
-                    pbar.update(0)
-            log, sampled_imgs = self.model.log_images(imgs[0][None])
-            torchvision.utils.save_image(
-                sampled_imgs,
-                os.path.join(self.experiment_dir, f"transformer_{epoch}.jpg"),
-                nrow=4,
-            )
-            # plot_images(log)
-            torch.save(
-                self.model.state_dict(),
-                os.path.join(self.experiment_dir, "checkpoints", f"transformer_{epoch}.pt"),
-            )
+
+            for index, imgs in enumerate(dataloader):
+                self.optim.zero_grad()
+                imgs = imgs.to(device=self.device)
+                logits, targets = self.model(imgs)
+                loss = F.cross_entropy(
+                    logits.reshape(-1, logits.size(-1)), targets.reshape(-1)
+                )
+                loss.backward()
+                self.optim.step()
+
+                print(
+                    f"Epoch: {epoch+1}/{epochs} | Batch: {index}/{len(dataloader)} | Cross Entropy Loss : {loss:.4f}"
+                )

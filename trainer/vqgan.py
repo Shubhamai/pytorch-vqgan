@@ -172,14 +172,12 @@ class VQGANTrainer:
         self,
         dataloader: torch.utils.data.DataLoader,
         epochs: int = 1,
-        limit_steps: int = -1,
     ):
         """Trains the VQGAN for the given number of epochs
 
         Args:
             dataloader (torch.utils.data.DataLoader): dataloader to use.
             epochs (int, optional): number of epochs to train for. Defaults to 100.
-            limit_iterations (int, optional): training the model on a limited number of iterations. Defaults to -1, meaning all step from the dataloader.
         """
 
         for epoch in range(epochs):
@@ -192,10 +190,6 @@ class VQGANTrainer:
 
                 # Updating global step
                 self.global_step += 1
-
-                if limit_steps != -1 and self.global_step >= limit_steps:
-                    print("[INFO] Maximum number of steps reached, exiting")
-                    break
 
                 if index % self.save_every == 0:
 

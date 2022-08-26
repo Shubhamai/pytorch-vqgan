@@ -1,10 +1,10 @@
 # global params
-name : "mnist"
+# name : "mnist"
 
-device: "cuda"
-seed: 42
-epochs : 1
-limit_steps : 400 # use -1 if you want to train for all steps
+# device: "cuda"
+# seed: 42
+# epochs : 1
+# limit_steps : -1 # use -1 if you want to train for all steps
 
 # trainer params
 trainer:

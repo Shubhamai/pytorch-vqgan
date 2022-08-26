@@ -6,8 +6,8 @@ from utils import collate_fn
 
 
 def load_mnist(
-    batch_size: int = 16,
-    image_size: int = 28,
+    batch_size: int = 2,
+    image_size: int = 256,
     num_workers: int = 4,
     save_path: str = "data",
 ) -> torch.utils.data.DataLoader:
@@ -38,8 +38,11 @@ def load_mnist(
         ),
     )
 
+    # Reduced set for faster training
+    mnist_data_reduced = torch.utils.data.Subset(mnist_data, list(range(0, 800)))
+
     dataloader = torch.utils.data.DataLoader(
-        mnist_data,
+        mnist_data_reduced,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,

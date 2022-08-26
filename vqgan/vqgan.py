@@ -47,6 +47,7 @@ class VQGAN(nn.Module):
         super().__init__()
         
         self.img_channels = img_channels
+        self.num_codebook_vectors = num_codebook_vectors
 
         self.encoder = Encoder(
             img_channels=img_channels,

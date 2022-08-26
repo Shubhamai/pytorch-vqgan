@@ -1,79 +1,21 @@
-# Importing Libraries
-import argparse
-import os
-from unicodedata import name
-
+from trainer import Trainer
+from vqgan import VQGAN
+from transformer import VQGANTransformer
+from dataloader import load_mnist
 from aim import Run
 
-import yaml
 
-from dataloader import load_dataloader
-from trainer import VQGANTrainer, TransformerTrainer
-from utils import reproducibility
-from vqgan import VQGAN
+vqgan = VQGAN(img_channels=1)
+transformer = VQGANTransformer(vqgan)
+dataloader = load_mnist()
 
-
-def main(config: dict):
-    """
-    Main function for training the VQGAN ( Stage 1 )
-    """
-
-    # Reproducibility
-    reproducibility(config["seed"])
-
-    model = VQGAN(**config["model"]).to(config["device"])
-
-    # Experiment tracker
-    run = Run(experiment=config["name"])
-    run["hparams"] = config
-
-    # Setting up the trainer
-    trainer = VQGANTrainer(
-        model=model,
-        run=run,
-        device=config["device"],
-        **config["trainer"],
-    )
-
-    # Training the model
-    dataloader = load_dataloader(
-        **config["dataloader"],
-        image_size=config["model"]["img_size"],
-    )
-    trainer.train(
-        epochs=config["epochs"],
-        dataloader=dataloader,
-        limit_steps=config["limit_steps"],
-    )
-
-    # Saving the model
-    model.save_checkpoint(
-        os.path.join(config["trainer"]["experiment_dir"], "checkpoints", "model.pt")
-    )
-
-    # ========================================= TRAINING TRANSFORMERS ======================================
-
-    transformer = TransformerTrainer(
-        os.path.join(config["trainer"]["experiment_dir"], "model.pt"),
-        experiment_dir=config["experiment_dir"],
-        device=config["device"],
-    )
-
-    transformer.train(1, device=config["device"], dataloader=dataloader)
+run = Run(experiment="mnist")
 
 
-if __name__ == "__main__":
+trainer = Trainer(vqgan, transformer, run=run, config={"vqgan":{}, "transformer":{}})
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--config_path",
-        type=str,
-        default="configs/mnist.yml",
-        help="path to config file",
-    )
+trainer.train_vqgan(dataloader)
 
-    args = parser.parse_args()
-    with open(args.config_path) as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
+trainer.train_transformers(dataloader)
 
-    main(config)
+trainer.generate_images()
