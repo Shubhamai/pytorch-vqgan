@@ -8,7 +8,7 @@ from aim import Run
 import yaml
 
 from dataloader import load_dataloader
-from trainer import VQGANTrainer
+from trainer import VQGANTrainer, TransformerTrainer
 from utils import reproducibility
 from vqgan import VQGAN
 
@@ -24,12 +24,15 @@ def main(config: dict):
     model = VQGAN(**config["model"]).to(config["device"])
 
     # Experiment tracker
-    run = Run(experiment=config['name'])
+    run = Run(experiment=config["name"])
     run["hparams"] = config
 
     # Setting up the trainer
     trainer = VQGANTrainer(
-        model=model, run=run, device=config["device"], **config["trainer"], 
+        model=model,
+        run=run,
+        device=config["device"],
+        **config["trainer"],
     )
 
     # Training the model
@@ -44,7 +47,19 @@ def main(config: dict):
     )
 
     # Saving the model
-    model.save_checkpoint(os.path.join(config["trainer"]["experiment_dir"], "model.pt"))
+    model.save_checkpoint(
+        os.path.join(config["trainer"]["experiment_dir"], "checkpoints", "model.pt")
+    )
+
+    # ========================================= TRAINING TRANSFORMERS ======================================
+
+    transformer = TransformerTrainer(
+        os.path.join(config["trainer"]["experiment_dir"], "model.pt"),
+        experiment_dir=config["experiment_dir"],
+        device=config["device"],
+    )
+
+    transformer.train(1, device=config["device"], dataloader=dataloader)
 
 
 if __name__ == "__main__":

@@ -47,9 +47,7 @@ class VQGANTrainer:
         self.vqgan = model
 
         # Discriminator parameters
-        self.discriminator = Discriminator(image_channels=self.vqgan.img_channels).to(
-            self.device
-        )
+        self.discriminator = Discriminator(image_channels=self.vqgan.img_channels).to(self.device)
         self.discriminator.apply(weights_init)
 
         # Loss parameters
