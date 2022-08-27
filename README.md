@@ -25,8 +25,7 @@ I created this repo to better understand VQGAN myself, and to provide scripts fo
   - [Setup](#setup)
   - [Usage](#usage)
     - [Training](#training-1)
-    - [Testing](#testing)
-    - [Visualizing](#visualizing)
+    - [Generation](#generation-1)
     - [Tests](#tests)
   - [Hardware requirements](#hardware-requirements)
   - [Shoutouts](#shoutouts)
@@ -157,16 +156,23 @@ Due to computation constraints of generating high-resolution images, they also u
 
 ### Training
 
-You can start the training by running `python train.py`. It reads the default config file from `configs/mnist.yml` . To change the config path, run - `python train.py --config_path configs/mnist.yaml`. 
+You can start the training by running `python train.py`. It reads the default config file from `configs/default.yml` . To change the config path, run - `python train.py --config_path configs/default.yaml`. 
 
 Here's what mostly the script does -  
 - Downloads the MNIST dataset automatically and saved in the [data](/data) directory ( specified in config ).
-- Training the VQGAN model on the MNIST train set with parameters passed from the config file.
+- Training the VQGAN and transformer model on the MNIST train set with parameters passed from the config file.
 - The training metrics, visualizations and model are saved in the [experiments/](/experiments/) directory with the corresponding path specified in the config file.
 
-### Testing
+Run `aim up` to open the experiment tracker to see the metrics and reconstructed & generated images. 
 
-### Visualizing
+<p float="left">
+<img src="./utils/assets/aim_images.png" width="360"/><img src="./utils/assets/aim_metrics.png" width="360"/>
+</p>
+
+
+### Generation
+
+To generate the images, simply run `python generate.py`, the models will be loaded from the `experiments/checkpoints` and the output will be saved in `experiments`. 
 
 ### Tests
 
