@@ -6,8 +6,8 @@ from dataloader import load_mnist, load_cifar10
 
 def load_dataloader(
     name: str = "mnist",
-    batch_size: int = 16,
-    image_size: int = 28,
+    batch_size: int = 2,
+    image_size: int = 256,
     num_workers: int = 4,
     save_path: str = "data",
 ) -> torch.utils.data.DataLoader:
@@ -15,8 +15,8 @@ def load_dataloader(
 
     Args:
         name (str, optional): The name of the data loader. Defaults to "mnist".
-        batch_size (int, optional): The batch size. Defaults to 16.
-        image_size (int, optional): The image size. Defaults to 28.
+        batch_size (int, optional): The batch size. Defaults to 2.
+        image_size (int, optional): The image size. Defaults to 256.
         num_workers (int, optional): The number of workers to use for the dataloader. Defaults to 4.
         save_path (str, optional): The path to save the data to. Defaults to "data".
 

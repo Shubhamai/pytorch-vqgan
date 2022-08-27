@@ -1,0 +1,37 @@
+architecture:
+  vqgan:
+    img_channels: 1
+    img_size: 256
+    latent_channels: 256
+    latent_size: 16
+    intermediate_channels: [128, 128, 256, 256, 512]
+    num_residual_blocks_encoder: 2
+    num_residual_blocks_decoder: 3
+    dropout: 0.0
+    attention_resolution: [16]
+    num_codebook_vectors: 1024
+
+  transformer:
+    sos_token: 0
+    pkeep: 0.5
+    block_size: 512
+    n_layer: 12
+    n_head: 16
+    n_embd: 1024
+
+trainer:
+  vqgan:
+    learning_rate: 2.25e-05
+    beta1: 0.5
+    beta2: 0.9
+    perceptual_loss_factor: 1.0
+    rec_loss_factor: 1.0
+    disc_factor: 1.0
+    disc_start: 100
+    perceptual_model: "vgg"
+    save_every: 10
+
+  transformer:
+    learning_rate: 4.5e-06
+    beta1: 0.9
+    beta2: 0.95

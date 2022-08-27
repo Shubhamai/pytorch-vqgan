@@ -12,7 +12,7 @@ import torch
 import torch.nn.functional as F
 import torchvision
 from aim import Image, Run
-from utils import clean_directory, weights_init
+from utils import weights_init
 from vqgan import Discriminator
 
 
@@ -47,7 +47,9 @@ class VQGANTrainer:
         self.vqgan = model
 
         # Discriminator parameters
-        self.discriminator = Discriminator(image_channels=self.vqgan.img_channels).to(self.device)
+        self.discriminator = Discriminator(image_channels=self.vqgan.img_channels).to(
+            self.device
+        )
         self.discriminator.apply(weights_init)
 
         # Loss parameters
@@ -147,10 +149,19 @@ class VQGANTrainer:
         # ======================================================================================================================
         # Tracking metrics
 
-        self.run.track(perceptual_rec_loss, name="Perceptual & Reconstruction loss", step=self.global_step)
+        self.run.track(
+            perceptual_rec_loss,
+            name="Perceptual & Reconstruction loss",
+            step=self.global_step,
+            context={"stage": "vqgan"},
+        )
 
-        self.run.track(vq_loss, name="VQ Loss", step=self.global_step)
-        self.run.track(gan_loss, name="GAN Loss", step=self.global_step)
+        self.run.track(
+            vq_loss, name="VQ Loss", step=self.global_step, context={"stage": "vqgan"}
+        )
+        self.run.track(
+            gan_loss, name="GAN Loss", step=self.global_step, context={"stage": "vqgan"}
+        )
 
         # =======================================================================================================================
         # Backpropagation
@@ -226,7 +237,19 @@ class VQGANTrainer:
                             gif_img = gif_img.astype(np.uint8)
 
                             self.run.track(
-                                Image(gif_img), name="VQGAN Reconstruction", step=self.global_step
+                                Image(
+                                    torchvision.utils.make_grid(
+                                        torch.cat(
+                                            (
+                                                imgs,
+                                                decoded_images,
+                                            ),
+                                        )
+                                    ).mul(255).add_(0.5).clamp_(0, 255).permute(1, 2, 0).to('cpu', torch.uint8).numpy()
+                                ),
+                                name="VQGAN Reconstruction",
+                                step=self.global_step,
+                                context={"stage": "vqgan"},
                             )
 
                             self.gif_images.append(gif_img)

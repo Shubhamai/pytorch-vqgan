@@ -32,11 +32,15 @@ class Trainer:
         self.seed = seed
         self.device = device
 
+        print(f"[INFO] Setting seed to {seed}")
         reproducibility(seed)
 
+        print(f"[INFO] Results will be saved in {experiment_dir}")
         self.experiment_dir = experiment_dir
 
     def train_vqgan(self, dataloader: torch.utils.data.DataLoader, epochs: int = 1):
+
+        print(f"[INFO] Training VQGAN on {self.device} for {epochs} epoch(s).")
 
         self.vqgan.to(self.device)
 
@@ -61,6 +65,8 @@ class Trainer:
     def train_transformers(
         self, dataloader: torch.utils.data.DataLoader, epochs: int = 1
     ):
+
+        print(f"[INFO] Training Transformer on {self.device} for {epochs} epoch(s).")
 
         self.transformer = self.transformer.to(self.device)
 
@@ -94,3 +100,4 @@ class Trainer:
                 os.path.join(self.experiment_dir, f"generated_{i}.jpg"),
                 nrow=4,
             )
+

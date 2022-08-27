@@ -1,13 +1,10 @@
 # Importing Libraries
-import os
+import torchvision
 
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
-from tqdm import tqdm
-from aim import Run
+from aim import Run, Image
 
 
 class TransformerTrainer:
@@ -17,15 +14,22 @@ class TransformerTrainer:
         run: Run,
         experiment_dir: str = "experiments",
         device: str = "cuda",
+        learning_rate: float = 4.5e-06,
+        beta1: float = 0.9,
+        beta2: float = 0.95,
     ):
-
+        self.run = run
         self.experiment_dir = experiment_dir
 
         self.model = model
         self.device = device
-        self.optim = self.configure_optimizers()
+        self.optim = self.configure_optimizers(
+            learning_rate=learning_rate, beta1=beta1, beta2=beta2
+        )
 
-    def configure_optimizers(self):
+    def configure_optimizers(
+        self, learning_rate: float = 4.5e-06, beta1: float = 0.9, beta2: float = 0.95
+    ):
         decay, no_decay = set(), set()
         whitelist_weight_modules = (nn.Linear,)
         blacklist_weight_modules = (nn.LayerNorm, nn.Embedding)
@@ -58,7 +62,9 @@ class TransformerTrainer:
             },
         ]
 
-        optimizer = torch.optim.AdamW(optim_groups, lr=4.5e-06, betas=(0.9, 0.95))
+        optimizer = torch.optim.AdamW(
+            optim_groups, lr=learning_rate, betas=(beta1, beta2)
+        )
         return optimizer
 
     def train(self, dataloader: torch.utils.data.DataLoader, epochs: int):
@@ -74,6 +80,31 @@ class TransformerTrainer:
                 loss.backward()
                 self.optim.step()
 
-                print(
-                    f"Epoch: {epoch+1}/{epochs} | Batch: {index}/{len(dataloader)} | Cross Entropy Loss : {loss:.4f}"
+                self.run.track(
+                    loss,
+                    name="Cross Entropy Loss",
+                    step=index,
+                    context={"stage": "transformer"},
                 )
+
+                if index % 10 == 0:
+                    print(
+                        f"Epoch: {epoch+1}/{epochs} | Batch: {index}/{len(dataloader)} | Cross Entropy Loss : {loss:.4f}"
+                    )
+
+                    _, sampled_imgs = self.model.log_images(imgs[0][None])
+
+                    self.run.track(
+                        Image(
+                            torchvision.utils.make_grid(sampled_imgs)
+                            .mul(255)
+                            .add_(0.5)
+                            .clamp_(0, 255)
+                            .permute(1, 2, 0)
+                            .to("cpu", torch.uint8)
+                            .numpy()
+                        ),
+                        name="Transformer Images",
+                        step=index,
+                        context={"stage": "transformer"},
+                    )

@@ -9,9 +9,9 @@ class VQGANTransformer(nn.Module):
     def __init__(
         self,
         vqgan: nn.Module,
+        device: str = "cuda",
         sos_token: int = 0,
         pkeep: float = 0.5,
-        device: str = "cuda",
         block_size: int = 512,
         n_layer: int = 12,
         n_head: int = 16,

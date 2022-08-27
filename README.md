@@ -28,8 +28,6 @@ I created this repo to better understand VQGAN myself, and to provide scripts fo
     - [Testing](#testing)
     - [Visualizing](#visualizing)
     - [Tests](#tests)
-  - [Notes](#notes)
-    - [TODOs](#todos)
   - [Hardware requirements](#hardware-requirements)
   - [Shoutouts](#shoutouts)
   - [BibTeX](#bibtex)
@@ -142,7 +140,7 @@ To generate the images from VQGAN, we generate the quantized vectors from [Stage
 <img align="right" src="./utils/assets/sliding_window.png" width="300"/>
 
 
-This stage contains Transformers 🤖 which are trained to predict the next latent vector from the sequence of previous latent vectors in the quantized encoder output. The paper uses [`mingpt.py`](transformers/mingpt.py) from Andrej Karpathy's [karpathy/minGPT](https://github.com/karpathy/minGPT) repo. 
+This stage contains Transformers 🤖 which are trained to predict the next latent vector from the sequence of previous latent vectors in the quantized encoder output. The paper uses [`mingpt.py`](transformer/mingpt.py) from Andrej Karpathy's [karpathy/minGPT](https://github.com/karpathy/minGPT) repo. 
 
 Due to computation constraints of generating high-resolution images, they also use a sliding attention window to predict the next latent vector from its neighbor vectors in the quantized encoder output.   
 
@@ -176,9 +174,6 @@ I have also just started getting my feet wet with testing and automated testing 
 
 To run tests, run `pytest --cov-config=.coveragerc --cov=. test`
 
-## Notes
-
-### TODOs  
 
 ## Hardware requirements
 

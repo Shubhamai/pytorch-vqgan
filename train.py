@@ -1,21 +1,74 @@
-from trainer import Trainer
-from vqgan import VQGAN
-from transformer import VQGANTransformer
-from dataloader import load_mnist
+# Importing Libraries
+import argparse
+
+import yaml
 from aim import Run
 
-
-vqgan = VQGAN(img_channels=1)
-transformer = VQGANTransformer(vqgan)
-dataloader = load_mnist()
-
-run = Run(experiment="mnist")
+from dataloader import load_dataloader
+from trainer import Trainer
+from transformer import VQGANTransformer
+from vqgan import VQGAN
 
 
-trainer = Trainer(vqgan, transformer, run=run, config={"vqgan":{}, "transformer":{}})
+def main(args, config):
 
-trainer.train_vqgan(dataloader)
+    vqgan = VQGAN(**config["architecture"]["vqgan"])
+    transformer = VQGANTransformer(
+        vqgan, **config["architecture"]["transformer"], device=args.device
+    )
+    dataloader = load_dataloader(name=args.dataset_name)
 
-trainer.train_transformers(dataloader)
+    run = Run(experiment=args.dataset_name)
+    run["hparams"] = config
 
-trainer.generate_images()
+    trainer = Trainer(
+        vqgan,
+        transformer,
+        run=run,
+        config=config["trainer"],
+        seed=args.seed,
+        device=args.device,
+    )
+
+    trainer.train_vqgan(dataloader)
+    trainer.train_transformers(dataloader)
+    trainer.generate_images()
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config_path",
+        type=str,
+        default="configs/default.yml",
+        help="path to config file",
+    )
+    parser.add_argument(
+        "--dataset_name",
+        type=str,
+        choices=["mnist", "cifar", "custom"],
+        default="mnist",
+        help="Dataset for the model",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cuda",
+        choices=["cpu", "cuda"],
+        help="Device to train the model on",
+    )
+    parser.add_argument(
+        "--seed",
+        type=str,
+        default=42,
+        help="Seed for Reproducibility",
+    )
+
+    args = parser.parse_args()
+
+    args = parser.parse_args()
+    with open(args.config_path) as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    main(args, config)

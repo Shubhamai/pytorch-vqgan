@@ -8,4 +8,4 @@ def test_load_mnist():
     for imgs in dataloader:
         break
 
-    assert imgs.shape == (16, 1, 28, 28)
+    assert imgs.shape == (16, 1, 256, 256)
