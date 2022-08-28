@@ -156,17 +156,17 @@ Due to computation constraints of generating high-resolution images, they also u
 
 ### Training
 
-You can start the training by running `python train.py`. It reads the default config file from `configs/default.yml` . To change the config path, run - `python train.py --config_path configs/default.yaml`. 
+- You can start the training by running `python train.py`. It reads the default config file from `configs/default.yml` . To change the config path, run - `python train.py --config_path configs/default.yaml`. 
 
-Here's what mostly the script does -  
-- Downloads the MNIST dataset automatically and saved in the [data](/data) directory ( specified in config ).
-- Training the VQGAN and transformer model on the MNIST train set with parameters passed from the config file.
-- The training metrics, visualizations and model are saved in the [experiments/](/experiments/) directory with the corresponding path specified in the config file.
+  Here's what mostly the script does -  
+  - Downloads the MNIST dataset automatically and saved in the [data](/data) directory ( specified in config ).
+  - Training the VQGAN and transformer model on the MNIST train set with parameters passed from the config file.
+  - The training metrics, visualizations and model are saved in the [experiments/](/experiments/) directory with the corresponding path specified in the config file.
 
-Run `aim up` to open the experiment tracker to see the metrics and reconstructed & generated images. 
+- Run `aim up` to open the experiment tracker to see the metrics and reconstructed & generated images. 
 
-<p float="left">
-<img src="./utils/assets/aim_images.png" width="360"/><img src="./utils/assets/aim_metrics.png" width="360"/>
+<p align="center">
+<img src="./utils/assets/aim_images.png" width="500"/><img src="./utils/assets/aim_metrics.png" width="500"/>
 </p>
 
 

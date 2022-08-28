@@ -2,9 +2,7 @@
 import argparse
 
 import yaml
-from aim import Run
 
-from dataloader import load_dataloader
 from trainer import Trainer
 from transformer import VQGANTransformer
 from vqgan import VQGAN
@@ -12,18 +10,18 @@ from vqgan import VQGAN
 
 def main(args, config):
 
-    vqgan = VQGAN(**config["architecture"]["vqgan"]).load_checkpoint("./experiments/checkpoints/vqgan.pt")
-    transformer = VQGANTransformer(
-        vqgan, **config["architecture"]["transformer"], device=args.device
-    ).load_checkpoint("./experiments/checkpoints/transformer.pt")
-    
-    run = Run(experiment=args.dataset_name)
-    run["hparams"] = config
+    vqgan = VQGAN(**config["architecture"]["vqgan"])
+    vqgan.load_checkpoint("./experiments/checkpoints/vqgan.pt")
 
+    transformer = VQGANTransformer(
+        vqgan, device=args.device, **config["architecture"]["transformer"]
+    )
+    transformer.load_checkpoint("./experiments/checkpoints/transformer.pt")
+    
     trainer = Trainer(
         vqgan,
         transformer,
-        run=run,
+        run=None,
         config=config["trainer"],
         seed=args.seed,
         device=args.device,

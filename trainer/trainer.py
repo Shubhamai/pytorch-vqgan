@@ -68,6 +68,7 @@ class Trainer:
 
         print(f"[INFO] Training Transformer on {self.device} for {epochs} epoch(s).")
 
+        self.vqgan.eval()
         self.transformer = self.transformer.to(self.device)
 
         self.transformer_trainer = TransformerTrainer(
@@ -85,6 +86,12 @@ class Trainer:
         )
 
     def generate_images(self, n_images: int = 5):
+
+        print(f"[INFO] Generating {n_images} images...")
+
+        self.vqgan.to(self.device)
+        self.transformer = self.transformer.to(self.device)
+
 
         for i in range(n_images):
             start_indices = torch.zeros((4, 0)).long().to(self.device)

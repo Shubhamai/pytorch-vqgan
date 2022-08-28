@@ -135,6 +135,7 @@ class VQGANTransformer(nn.Module):
         top_k: int = 100,
     ):
         self.transformer.eval()
+
         x = torch.cat((c, x), dim=1)  # Appending sos token
         for k in range(steps):
             logits, _ = self.transformer(x)  # Getting the predicted indices
@@ -163,7 +164,7 @@ class VQGANTransformer(nn.Module):
 
         _, indices = self.encode_to_z(x)
         sos_tokens = torch.ones(x.shape[0], 1) * self.sos_token
-        sos_tokens = sos_tokens.long().to("cuda")
+        sos_tokens = sos_tokens.long().to(self.device)
 
         start_indices = indices[:, : indices.shape[1] // 2]
         sample_indices = self.sample(
