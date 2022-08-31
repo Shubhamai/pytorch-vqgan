@@ -1,3 +1,7 @@
+"""
+https://github.com/dome272/VQGAN-pytorch/blob/main/transformer.py
+"""
+
 # Importing Libraries
 import torch
 import torch.nn as nn
@@ -70,7 +74,13 @@ class VQGANTransformer(nn.Module):
         image = self.vqgan.decode(ix_to_vectors)
         return image
 
-    def forward(self, x):
+    def forward(self, x:torch.Tensor) -> torch.Tensor:
+        """
+        transformer model forward pass 
+
+        Args:
+            x (torch.tensor): Batch of images
+        """
 
         # Getting the codebook indices of the image
         _, indices = self.encode_to_z(x)
@@ -133,7 +143,20 @@ class VQGANTransformer(nn.Module):
         steps: int = 256,
         temperature: float = 1.0,
         top_k: int = 100,
-    ):
+    ) -> torch.Tensor:
+        """Generating sample indices from the transformer
+
+        Args:
+            x (torch.Tensor): the batch of images
+            c (torch.Tensor): sos token 
+            steps (int, optional): the lenght of indices to generate. Defaults to 256.
+            temperature (float, optional): hyperparameter for minGPT model. Defaults to 1.0.
+            top_k (int, optional): keeping top k entries. Defaults to 100.
+
+        Returns:
+            torch.Tensor: _description_
+        """
+
         self.transformer.eval()
 
         x = torch.cat((c, x), dim=1)  # Appending sos token
@@ -159,10 +182,18 @@ class VQGANTransformer(nn.Module):
         return x
 
     @torch.no_grad()
-    def log_images(self, x):
+    def log_images(self, x:torch.Tensor):
+        """ Generating images using the transformer and decoder. Also uses encoder to complete partial images.   
+
+        Args:
+            x (torch.Tensor): batch of images
+
+        Returns:
+            Retures the input and generated image in dictionary and in a simple concatenated image
+        """
         log = dict()
 
-        _, indices = self.encode_to_z(x)
+        _, indices = self.encode_to_z(x) # Getting the indices of the quantized encoding
         sos_tokens = torch.ones(x.shape[0], 1) * self.sos_token
         sos_tokens = sos_tokens.long().to(self.device)
 

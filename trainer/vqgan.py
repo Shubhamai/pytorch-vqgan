@@ -215,6 +215,10 @@ class VQGANTrainer:
                         )
 
                         with torch.no_grad():
+                            
+                            """
+                            Note : Lots of efficiency & cleaning needed here
+                            """
 
                             gif_img = (
                                 torchvision.utils.make_grid(

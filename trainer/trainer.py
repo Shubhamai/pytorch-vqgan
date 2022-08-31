@@ -4,11 +4,9 @@ import os
 import torch
 import torchvision
 from aim import Run
-from dataloader import load_dataloader
 from utils import reproducibility
 
 from trainer import TransformerTrainer, VQGANTrainer
-from vqgan import VQGAN
 
 
 class Trainer:

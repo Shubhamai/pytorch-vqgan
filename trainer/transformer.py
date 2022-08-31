@@ -34,6 +34,7 @@ class TransformerTrainer:
         whitelist_weight_modules = (nn.Linear,)
         blacklist_weight_modules = (nn.LayerNorm, nn.Embedding)
 
+        # Enabling weight decay to only certain layers
         for mn, m in self.model.transformer.named_modules():
             for pn, p in m.named_parameters():
                 fpn = f"{mn}.{pn}" if mn else pn
